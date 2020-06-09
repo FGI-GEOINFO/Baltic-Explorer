@@ -46,7 +46,7 @@ L.U.Slideshow = L.Class.extend({
             // Certainly IE8, which has a limited version of defineProperty
         }
         if (this.options.autoplay) {
-            this.map.onceDataLoaded(function () {
+            this.map.onceDatalayersLoaded(function () {
                 this.play();
             }, this);
         }
@@ -61,7 +61,7 @@ L.U.Slideshow = L.Class.extend({
     },
 
     defaultDatalayer: function () {
-        return this.map.findDataLayer(function (d) { return d.allowBrowse() && d.hasData(); });
+        return this.map.findDataLayer(function (d) { return d.allowBrowse(); });
     },
 
     timeSpinner: function () {
@@ -90,8 +90,8 @@ L.U.Slideshow = L.Class.extend({
 
     play: function () {
         if (this._id) return;
-        if (this.map.editEnabled || !this.map.options.slideshow.active) return;
-        L.DomUtil.addClass(document.body, L.U.Slideshow.CLASSNAME);
+        if (this.map.editEnabled) return;
+        L.DomUtil.addClass(document.body, L.U.Slideshow.CL.USNAME);
         this._id = window.setInterval(L.bind(this.loop, this), this.options.delay);
         this.resetSpinners();
         this.loop();
@@ -104,7 +104,7 @@ L.U.Slideshow = L.Class.extend({
 
     pause: function () {
         if (this._id) {
-            L.DomUtil.removeClass(document.body, L.U.Slideshow.CLASSNAME);
+            L.DomUtil.removeClass(document.body, L.U.Slideshow.CL.USNAME);
             window.clearInterval(this._id);
             this._id = null;
         }

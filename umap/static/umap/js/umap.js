@@ -2,36 +2,46 @@ L.Map.mergeOptions({
     base_layers: null,
     overlay_layers: null,
     datalayers: [],
+    analysisLayers: [],
+    openAnalysisLayer: [],
+    openWMS: [],
     center: [4, 50],
     zoom: 6,
     hash: true,
-    default_color: 'DarkBlue',
+    default_color: '#332288',
     default_smoothFactor: 1.0,
-    default_opacity: 0.5,
+    default_opacity: 1,
     default_fillOpacity: 0.3,
     default_stroke: true,
     default_fill: true,
-    default_weight: 3,
-    default_iconClass: 'Default',
+    default_weight: 2,
+    default_iconClass: 'Drop',
     default_zoomTo: 16,
-    default_popupContentTemplate: '# {name}\n{description}',
+    default_popupContentTemplate: '# {name}\n{description}\n{comments}\n',
     default_interactive: true,
     default_labelDirection: 'auto',
     attributionControl: false,
     allowEdit: true,
-    embedControl: true,
-    zoomControl: true,
+    embedControl: false,
+    zoomControl: false,
     datalayersControl: true,
-    searchControl: true,
+    legendControl: false,
+    searchControl: false,
+    measureControl: true,
     editInOSMControl: false,
     editInOSMControlOptions: false,
+    openWMSControl: true,
+    infoControl: true,
+    syncControl: true,
+    protoControl: true,
+    saveControl: true,
     scaleControl: true,
-    noControl: false,  // Do not render any control.
+    noControl: false,
     miniMap: false,
     name: '',
     description: '',
     displayPopupFooter: false,
-    demoTileInfos: {s: 'a', z: 9, x: 265, y: 181, r: ''},
+    demoTileInfos: {s: '', z: 1, x: 19, y: 16, r: ''}, 
     licences: [],
     licence: '',
     enableMarkerDraw: true,
@@ -39,9 +49,8 @@ L.Map.mergeOptions({
     enablePolylineDraw: true,
     limitBounds: {},
     importPresets: [
-        // {url: 'http://localhost:8019/en/datalayer/1502/', label: 'Simplified World Countries', format: 'geojson'}
     ],
-    moreControl: true,
+    moreControl: false,
     captionBar: false,
     slideshow: {},
     clickable: true,
@@ -50,7 +59,7 @@ L.Map.mergeOptions({
 
 L.U.Map.include({
 
-    HIDDABLE_CONTROLS: ['zoom', 'search', 'fullscreen', 'embed', 'locate', 'measure', 'tilelayers', 'editinosm', 'datalayers'],
+    HIDDABLE_CONTROLS: ['search', 'sync', 'measure', 'info', 'zoom', 'embed', 'locate', 'tilelayers', 'datalayers', 'legend', 'openWMS', 'editinosm', 'save'],
 
     initialize: function (el, geojson) {
 
@@ -61,7 +70,16 @@ L.U.Map.include({
         geojson.properties.zoomControl = false;
         var fullscreenControl = typeof geojson.properties.fullscreenControl !== 'undefined' ? geojson.properties.fullscreenControl : true;
         geojson.properties.fullscreenControl = false;
+        var crs = new L.Proj.CRS(geojson.properties.epsg,
+          geojson.properties.proj,
+          {
+            resolutions: geojson.properties.resolutions,
+            origin: geojson.properties.origin
+          });
+        geojson.properties.crs = crs;
+
         L.Util.setBooleanFromQueryString(geojson.properties, 'scrollWheelZoom');
+
         L.Map.prototype.initialize.call(this, el, geojson.properties);
 
         this.ui = new L.U.UI(this._container);
@@ -80,13 +98,16 @@ L.U.Map.include({
         if (geojson.geometry) this.options.center = geojson.geometry;
         this.options.zoomControl = zoomControl;
         this.options.fullscreenControl = fullscreenControl;
+
         L.Util.setBooleanFromQueryString(this.options, 'moreControl');
         L.Util.setBooleanFromQueryString(this.options, 'scaleControl');
         L.Util.setBooleanFromQueryString(this.options, 'miniMap');
         L.Util.setBooleanFromQueryString(this.options, 'allowEdit');
         L.Util.setBooleanFromQueryString(this.options, 'displayDataBrowserOnLoad');
         L.Util.setBooleanFromQueryString(this.options, 'displayCaptionOnLoad');
+        L.Util.setBooleanFromQueryString(this.options, 'displayLegendOnLoad');
         L.Util.setBooleanFromQueryString(this.options, 'captionBar');
+        
         for (var i = 0; i < this.HIDDABLE_CONTROLS.length; i++) {
             L.Util.setNullableBooleanFromQueryString(this.options, this.HIDDABLE_CONTROLS[i] + 'Control');
         }
@@ -121,19 +142,21 @@ L.U.Map.include({
         this.handleLimitBounds();
 
         this.initTileLayers(this.options.tilelayers);
+        this.initWMSLayers(this.options.tilelayerswms);
 
-        // Global storage for retrieving datalayers and features
+        this.initOpenWMS();
+        // Global storage for retrieving datalayers
         this.datalayers = {};
         this.datalayers_index = [];
         this.dirty_datalayers = [];
-        this.features_index = {};
 
         // Retrocompat
         if (this.options.slideshow && this.options.slideshow.delay && this.options.slideshow.active === undefined) this.options.slideshow.active = true;
+        if (this.options.openWMS.length != 0){
+            this.options.legendControl = true;
+        }
 
         this.initControls();
-
-        // create datalayers
         this.initDatalayers();
 
         if (this.options.displayCaptionOnLoad) {
@@ -149,6 +172,13 @@ L.U.Map.include({
                 this.options.onLoadPanel = 'databrowser';
             }
             delete this.options.displayDataBrowserOnLoad;
+        }
+        if (this.options.displayLegendOnLoad) {
+            // Retrocompat
+            if (!this.options.onLoadPanel) {
+                this.options.onLoadPanel = 'legend';
+            }
+            delete this.options.displayLegendOnLoad;
         }
 
         this.ui.on('panel:closed', function () {
@@ -171,14 +201,15 @@ L.U.Map.include({
         catch (e) {
             // Certainly IE8, which has a limited version of defineProperty
         }
+
         this.on('baselayerchange', function (e) {
             if (this._controls.miniMap) this._controls.miniMap.onMainMapBaseLayerChange(e);
         }, this);
 
-        // Creation mode
+        // Creation mode - if there is no id, workspace is new
         if (!this.options.umap_id) {
             this.isDirty = true;
-            this.options.name = L._('Untitled map');
+            this.options.name = L._('New workspace');
             this.options.allowEdit = true;
             var datalayer = this.createDataLayer();
             datalayer.connectToMap();
@@ -197,24 +228,22 @@ L.U.Map.include({
         this.slideshow = new L.U.Slideshow(this, this.options.slideshow);
         this.permissions = new L.U.MapPermissions(this, this.options.permissions);
         this.initCaptionBar();
-        if (this.options.allowEdit) {
-            this.editTools = new L.U.Editable(this);
-            this.ui.on('panel:closed panel:open', function () {
-                this.editedFeature = null;
-            }, this);
-            this.initEditBar();
-        }
+
+        // Loading the feature edit tools.
+        this.editTools = new L.U.Editable(this);
+        this.ui.on('panel:closed panel:open', function () {
+            this.editedFeature = null;
+        }, this);
+        // this.initEditBar();
+        
         this.initShortcuts();
         this.onceDatalayersLoaded(function () {
             if (this.options.onLoadPanel === 'databrowser') this.openBrowser();
             else if (this.options.onLoadPanel === 'caption') this.displayCaption();
-        });
-        this.onceDataLoaded(function () {
-            const slug = L.Util.queryString('feature');
-            if (slug && this.features_index[slug]) this.features_index[slug].view();
+            else if (this.options.onLoadPanel === 'legend') this._controls.legend.openLegendSwitcher();
         });
 
-
+        // Warning message is attempting to leave workspace when you have unsaved progress
         window.onbeforeunload = function (e) {
             var msg = L._('You have unsaved changes.');
             if (self.isDirty) {
@@ -222,49 +251,76 @@ L.U.Map.include({
                 return msg;
             }
         };
+
         this.backup();
         this.initContextMenu();
         this.on('click contextmenu.show', this.closeInplaceToolbar);
+
+        // Reminder for user to give workspace a name other than "New workspace"
+        if (!this.options.umap_id) {
+            this.enableEdit();
+            this.edit();
+            this.ui.alert({content: L._('Please give your new workspace a name!'), 'level': 'info', duration: 5000});
+        } else if (this.options.name == "New workspace" && this.permissions.options.owner.id == this.options.user.id) {
+                this.enableEdit();
+                this.edit();
+                this.ui.alert({content: L._('Reminder! Please name your workspace!'), 'level': 'info', duration: 5000});
+        }
+
     },
+                
 
     initControls: function () {
         this.helpMenuActions = {};
         this._controls = {};
+        this._controls.scale = new L.control.scale({ 
+            position: 'bottomright',
+            maxWidth: "200"
+        });
 
-        if (this.options.allowEdit && !this.options.noControl) {
-            new L.U.EditControl(this).addTo(this);
-
-            new L.U.DrawToolbar({map: this}).addTo(this);
-
-            var editActions = [
-                L.U.ImportAction,
-                L.U.EditPropertiesAction,
-                L.U.ChangeTileLayerAction,
-                L.U.ManageDatalayersAction,
-                L.U.UpdateExtentAction,
-                L.U.UpdatePermsAction
-            ];
-            new L.U.SettingsToolbar({actions: editActions}).addTo(this);
-        }
-        this._controls.zoom = new L.Control.Zoom({zoomInTitle: L._('Zoom in'), zoomOutTitle: L._('Zoom out')});
-        this._controls.datalayers = new L.U.DataLayersControl(this);
+        this._controls.zoom = new L.Control.Zoom({zoomInTitle: L._('Zoom in'), zoomOutTitle: L._('Zoom out'), position:'bottomright'});
         this._controls.locate = new L.U.LocateControl();
-        this._controls.fullscreen = new L.Control.Fullscreen({title: {'false': L._('View Fullscreen'), 'true': L._('Exit Fullscreen')}});
+        
+        this._controls.fullscreen = new L.Control.Fullscreen({
+            title: {'false': L._('View Fullscreen'), 'true': L._('Exit Fullscreen')},
+            position: 'bottomright'
+        });
+        this._controls.datalayers = new L.U.DataLayersControl(this);
+        this._controls.info = new L.U.InfoControl(this);
+        this._controls.proto = new L.U.ProtoControl(this);
         this._controls.search = new L.U.SearchControl();
         this._controls.embed = new L.Control.Embed(this, this.options.embedOptions);
         this._controls.tilelayers = new L.U.TileLayerControl(this);
+        this._controls.legend = new L.Control.WMSLegend(this); 
+
+        this._controls.openWMS = new L.U.openWMSControl(this);
+        this._controls.sync = new L.U.SyncControl(this);
+        this._controls.save = new L.U.SaveControl(this);
+
         this._controls.editinosm = new L.Control.EditInOSM({
             position: 'topleft',
-            widgetOptions: {helpText: L._('Open this map extent in a map editor to provide more accurate data to OpenStreetMap')}
+            widgetOptions: {helpText: L._('')}
         });
-        this._controls.measure = (new L.MeasureControl()).initHandler(this);
+
+
+        this._controls.measure = (new L.MeasureControl({
+            position:'bottomright',
+            className: 'leaflet-bar'
+        })).initHandler(this);
+
+
         this._controls.more = new L.U.MoreControls();
-        this._controls.scale = L.control.scale();
+        
         if (this.options.scrollWheelZoom) this.scrollWheelZoom.enable();
         else this.scrollWheelZoom.disable();
+        this.maxSizeControl();
         this.renderControls();
+
     },
 
+
+
+ 
     renderControls: function () {
         L.DomUtil.classIf(document.body, 'umap-caption-bar-enabled', this.options.captionBar || (this.options.slideshow && this.options.slideshow.active));
         L.DomUtil.classIf(document.body, 'umap-slideshow-enabled', this.options.slideshow && this.options.slideshow.active);
@@ -274,6 +330,7 @@ L.U.Map.include({
         if (this.options.noControl) return;
 
         this._controls.attribution = (new L.U.AttributionControl()).addTo(this);
+        if (this.options.scaleControl) this._controls.scale.addTo(this);
         if (this.options.miniMap && !this.options.noControl) {
             this.whenReady(function () {
                 if (this.selected_tilelayer) {
@@ -282,6 +339,7 @@ L.U.Map.include({
                 }
             });
         }
+
         var name, status, control;
         for (var i = 0; i < this.HIDDABLE_CONTROLS.length; i++) {
             name = this.HIDDABLE_CONTROLS[i];
@@ -293,13 +351,66 @@ L.U.Map.include({
             else L.DomUtil.removeClass(control._container, 'display-on-more');
         }
         if (this.options.moreControl) this._controls.more.addTo(this);
-        if (this.options.scaleControl) this._controls.scale.addTo(this);
+        if (this.editControl) {
+            this.removeControl(this.editControl);
+        }
+        if (this.options.allowEdit && !this.options.noControl) {
+            this.editControl = new L.U.EditControl(this).addTo(this);
+            if (window.matchMedia('screen and (max-height: 600px)').matches) {
+                const drawToolBar = new L.U.DrawToolbar({
+                        map: this, 
+                        position: 'bottomleft',
+                    }).addTo(this);
+            
+            }
+            else{
+                const drawToolBar = new L.U.DrawToolbar({
+                        map: this, 
+                        position: 'topleft',
+                    }).addTo(this);
+            }           
+
+            new L.U.SettingsToolbar({actions: editActions, position: 'topleft'}).addTo(this);
+                    
+        }
+        
+    },
+    //check the size of the screen and changes the size of the scale bar, can be used for other controls as well
+    maxSizeControl: function(){
+        if (window.matchMedia('screen and (max-width: 600px)').matches) {
+            this._controls.scale.options.maxWidth = '100';
+        }
+        if (window.matchMedia('screen and (max-height: 600px)').matches) {
+            this._controls.scale.options.maxWidth = '100';
+
+        }
+
+    },
+        
+    syncDataLayers: function () {
+        location.reload(true); 
     },
 
     initDatalayers: function () {
-        var toload = dataToload = seen = this.options.datalayers.length,
-            self = this,
-            datalayer;
+        let datalayerNames = [];
+        for (x in this.options.datalayers) {
+            datalayerNames.push(this.options.datalayers[x].name);
+        }
+        if (this.options.user != undefined) {
+
+            if (!datalayerNames.includes(this.options.user.name)) {
+                datalayer = {name: this.options.user.name};
+                this.createDataLayer(datalayer);
+            }
+        } else {
+            if (!datalayerNames.includes("Anonymous user")) {
+                datalayer = {name: "Anonymous user"};
+                this.createDataLayer(datalayer);
+            }           
+        }
+        var toload = this.options.datalayers.length,
+            datalayer, seen = this.options.datalayers.length,
+            self = this;
         var loaded = function () {
             self.datalayersLoaded = true;
             self.fire('datalayersloaded');
@@ -308,22 +419,12 @@ L.U.Map.include({
             toload--;
             if (toload === 0) loaded();
         };
-        var dataLoaded = function () {
-            self.dataLoaded = true;
-            self.fire('dataloaded');
-        };
-        var decrementDataToLoad = function () {
-            dataToload--;
-            if (dataToload === 0) dataLoaded();
-        };
         for (var j = 0; j < this.options.datalayers.length; j++) {
             datalayer = this.createDataLayer(this.options.datalayers[j]);
             if (datalayer.displayedOnLoad()) datalayer.onceLoaded(decrementToLoad);
             else decrementToLoad();
-            if (datalayer.displayedOnLoad()) datalayer.onceDataLoaded(decrementDataToLoad);
-            else decrementDataToLoad();
         }
-        if (seen === 0) loaded() && dataLoaded();  // no datalayer
+        if (seen === 0) loaded();
     },
 
     indexDatalayers: function () {
@@ -345,21 +446,10 @@ L.U.Map.include({
     },
 
     onceDatalayersLoaded: function (callback, context) {
-        // Once datalayers **metadata** have been loaded
         if (this.datalayersLoaded) {
             callback.call(context || this, this);
         } else {
             this.once('datalayersloaded', callback, context);
-        }
-        return this;
-    },
-
-    onceDataLoaded: function (callback, context) {
-        // Once datalayers **data** have been loaded
-        if (this.dataLoaded) {
-            callback.call(context || this, this);
-        } else {
-            this.once('dataloaded', callback, context);
         }
         return this;
     },
@@ -371,6 +461,7 @@ L.U.Map.include({
     backupOptions: function () {
         this._backupOptions = L.extend({}, this.options);
         this._backupOptions.tilelayer = L.extend({}, this.options.tilelayer);
+        this._backupOptions.openWMS = L.extend({}, this.options.openWMS);
         this._backupOptions.limitBounds = L.extend({}, this.options.limitBounds);
         this._backupOptions.permissions = L.extend({}, this.permissions.options);
     },
@@ -378,6 +469,7 @@ L.U.Map.include({
     resetOptions: function () {
         this.options = L.extend({}, this._backupOptions);
         this.options.tilelayer = L.extend({}, this._backupOptions.tilelayer);
+        this.options.openWMS = L.extend({}, this._backupOptions.openWMS);
         this.permissions.options = L.extend({}, this._backupOptions.permissions);
     },
 
@@ -450,7 +542,6 @@ L.U.Map.include({
             if(this.options.tilelayers.hasOwnProperty(i)) {
                 this.tilelayers.push(this.createTileLayer(this.options.tilelayers[i]));
                 if (this.options.tilelayer && this.options.tilelayer.url_template === this.options.tilelayers[i].url_template) {
-                    // Keep control over the displayed attribution for non custom tilelayers
                     this.options.tilelayer.attribution = this.options.tilelayers[i].attribution;
                 }
             }
@@ -462,6 +553,7 @@ L.U.Map.include({
             this.selectTileLayer(this.tilelayers[0]);
         }
     },
+
 
     createTileLayer: function (tilelayer) {
         return new L.TileLayer(tilelayer.url_template, tilelayer);
@@ -485,9 +577,8 @@ L.U.Map.include({
         } catch (e) {
             this.removeLayer(tilelayer);
             this.ui.alert({content: L._('Error in the tilelayer URL') + ': ' + tilelayer._url, level: 'error'});
-            // Users can put tilelayer URLs by hand, and if they add wrong {variable},
-            // Leaflet throw an error, and then the map is no more editable
         }
+        tilelayer.bringToBack();
     },
 
     eachTileLayer: function (method, context) {
@@ -501,6 +592,166 @@ L.U.Map.include({
         if (this.customTilelayer && (Array.prototype.indexOf && urls.indexOf(this.customTilelayer._url) === -1)) {
             method.call(context || this, this.customTilelayer);
         }
+    },
+
+    ////////////////
+    // WMS LAYERS //
+    ////////////////
+
+    initWMSLayers: function () {
+        this.wmslayers = [];
+        this.wmslegends = [];
+        for(var i in this.options.tilelayerswms) {
+            this.wmslayers.push(this.createWMSLayer(this.options.tilelayerswms[i]));
+        }
+    },
+
+    initOpenWMS: function () {
+        for(var i in this.options.openWMS) {
+            for(var k in this.wmslayers) {
+                if (this.wmslayers[k].options.name == this.options.openWMS[i].name) {
+                    if(this.hasLayer(this.wmslayers[k])) {
+                        this.removeLayer(this.wmslayers[k]);
+                    }
+                    this.addLayer(this.wmslayers[k]);
+                    if(this.options.openWMS[i].opacity) {
+                        this.wmslayers[k].setOpacity(this.options.openWMS[i].opacity);
+                    }
+                    
+                }   
+            }
+        }
+    },
+
+    createWMSLayer: function (wmslayer) {
+        return new L.tileLayer.wms(wmslayer.url_template, wmslayer);
+    },
+
+    initWMSLegendControl: function () {
+        if (this.options.openWMS == '' || this.options.openWMS.length > 1) {
+            return;
+        } else {
+            this._controls.legend = new L.Control.WMSLegend(this);
+            this._controls.legend.addTo(this);
+        }
+
+
+    },
+
+    eachWMSLayer: function (method, context) {
+        var wmsurls = [];
+        for (var i in this.wmslayers) {
+            if (this.wmslayers.hasOwnProperty(i)) {
+                method.call(context, this.wmslayers[i], this.wmslegends[i]);
+                wmsurls.push(this.wmslayers[i]._url);
+            }
+        }
+        if (this.customWMSlayer && (Array.prototype.indexOf && wmsurls.indexOf(this.customWMSlayer._url) === -1)) {
+            method.call(context || this, this.customWMSlayer);
+        }
+    },
+
+    selectWMSLayer: function (wmslayer, el) {
+        this.isDirty = true;
+        if (el.classList.contains('selected') == true) { 
+            this.removeLayer(wmslayer);
+            el.classList.remove("selected");
+            if (this.options.openWMS.length > 1) {
+                for (var i in this.options.openWMS) {
+                    if (wmslayer.options.name == this.options.openWMS[i].name) {
+                        this.options.openWMS.splice(i, 1);
+                    }
+                }                
+            } 
+            else {
+                this.options.openWMS = [];
+                this.removeControl(this._controls.legend);
+            }
+            return false;
+        }
+        else if (el.classList.contains('selected') == false) {
+            this.addLayer(wmslayer);
+            el.classList.add('selected');
+            wmslayer.options.opacity = 1;
+            this.options.openWMS.push(wmslayer.toJSON());
+            this.initWMSLegendControl();
+            return true;
+        }
+        else
+            return;
+    },
+
+    updateWMSLayers: function () {
+        var self = this,
+            callback = function (wmslayer) {
+                self.isDirty = true;
+                
+            };
+        if (this._controls.openWMS) this._controls.openWMS.openWMSSwitcher({callback: callback, className: 'dark'});
+    },
+
+    moveWMS: function (old_index, new_index) {
+        const arr = this.options.openWMS;
+        while (old_index < 0) {
+            old_index += arr.length;
+        }
+        while (new_index < 0) {
+            new_index += arr.length;
+        }
+        if (new_index >= arr.length) {
+            var k = new_index - arr.length;
+            while ((k--) + 1) {
+                arr.push(undefined);
+            }
+        }
+        arr.splice(new_index, 0, arr.splice(old_index, 1)[0]);  
+        this.options.openWMS = arr;
+    },
+
+    runWMS: function () {
+        var x = this.options.openWMS;
+        var i = 0;
+        var map = this;
+        var wmsanimation = setInterval(frame, 2000);
+        
+        function frame() {
+            if (i == x.length) {
+                clearInterval(wmsanimation);
+                    for(var n in x) {
+                        for(var y in map.wmslayers) {
+                            if (map.wmslayers[y].options.name == x[n].name) {
+                                if (x[n].opacity) {
+                                    map.wmslayers[y].setOpacity(x[n].opacity);   
+                                } else {
+                                    map.wmslayers[y].setOpacity(1);  
+                                }
+                            }   
+                        }
+                    }
+                map.ui.alert({content: L._('Animation finished!'), 'level': 'info', duration: 1000});
+            } else {
+                if(x != '') {
+                    for(var r in x) {
+                        for(var k in map.wmslayers) {
+                            if (map.wmslayers[k].options.name == x[r].name) {
+                                map.wmslayers[k].setOpacity(0);   
+                            }   
+                        }
+                    }
+                }
+                if(x != '') {
+                    for(var t in map.wmslayers) {
+                        if (map.wmslayers[t].options.name == x[i].name) {
+                            map.ui.alert({content: L._(x[i].name), 'level': 'info'});
+                            map.wmslayers[t].setOpacity(1);
+                            
+                        }   
+                    }
+                }
+            }
+            i++;
+        }
+
     },
 
     initCenter: function () {
@@ -561,7 +812,7 @@ L.U.Map.include({
     },
 
     createDataLayer: function(datalayer) {
-        datalayer = datalayer || {name: L._('Layer') + ' ' + (this.datalayers_index.length + 1)};
+        datalayer = datalayer || {name: L._('Shared layer')};
         return new L.U.DataLayer(this, datalayer);
     },
 
@@ -595,49 +846,12 @@ L.U.Map.include({
     },
 
     renderShareBox: function () {
-        var container = L.DomUtil.create('div', 'umap-share'),
-            embedTitle = L.DomUtil.add('h4', '', container, L._('Embed the map')),
-            iframe = L.DomUtil.create('textarea', 'umap-share-iframe', container),
-            option;
-        var UIFields = [
-            ['dimensions.width', {handler: 'Input', label: L._('width')}],
-            ['dimensions.height', {handler: 'Input', label: L._('height')}],
-            ['options.includeFullScreenLink', {handler: 'Switch', label: L._('Include full screen link?')}],
-            ['options.currentView', {handler: 'Switch', label: L._('Current view instead of default map view?')}],
-            ['options.keepCurrentDatalayers', {handler: 'Switch', label: L._('Keep current visible layers')}],
-            ['options.viewCurrentFeature', {handler: 'Switch', label: L._('Open current feature on load')}],
-            'queryString.moreControl',
-            'queryString.scrollWheelZoom',
-            'queryString.miniMap',
-            'queryString.scaleControl',
-            'queryString.onLoadPanel',
-            'queryString.captionBar'
-        ];
-        for (var i = 0; i < this.HIDDABLE_CONTROLS.length; i++) {
-            UIFields.push('queryString.' + this.HIDDABLE_CONTROLS[i] + 'Control');
-        }
-        var iframeExporter = new L.U.IframeExporter(this);
-        var buildIframeCode = function () {
-            iframe.innerHTML = iframeExporter.build();
-        };
-        buildIframeCode();
-        var builder = new L.U.FormBuilder(iframeExporter, UIFields, {
-            callback: buildIframeCode
-        });
-        var iframeOptions = L.DomUtil.createFieldset(container, L._('Iframe export options'));
-        iframeOptions.appendChild(builder.build());
-        if (this.options.shortUrl) {
-            L.DomUtil.create('hr', '', container);
-            L.DomUtil.add('h4', '', container, L._('Short URL'));
-            var shortUrl = L.DomUtil.create('input', 'umap-short-url', container);
-            shortUrl.type = 'text';
-            shortUrl.value = this.options.shortUrl;
-        }
-        L.DomUtil.create('hr', '', container);
+
+        var container = L.DomUtil.create('div', 'umap-share');
         L.DomUtil.add('h4', '', container, L._('Download data'));
         var typeInput = L.DomUtil.create('select', '', container);
         typeInput.name = 'format';
-        var exportCaveat = L.DomUtil.add('small', 'help-text', container, L._('Only visible features will be downloaded.'));
+        var exportCaveat = L.DomUtil.add('small', 'help-text', container, L._('Visible features will be downloaded. Overlays will not be downloaded.'));
         exportCaveat.id = 'export_caveat_text';
         var toggleCaveat = function () {
             if (typeInput.value === 'umap') exportCaveat.style.display = 'none';
@@ -648,7 +862,8 @@ L.U.Map.include({
             geojson: {
                 formatter: function (map) {return JSON.stringify(map.toGeoJSON(), null, 2);},
                 ext: '.geojson',
-                filetype: 'application/json'
+                filetype: 'application/json',
+                selected: true
             },
             gpx: {
                 formatter: function (map) {return togpx(map.toGeoJSON());},
@@ -664,21 +879,21 @@ L.U.Map.include({
                 name: L._('Full map data'),
                 formatter: function (map) {return map.serialize();},
                 ext: '.umap',
-                filetype: 'application/json',
-                selected: true
+                filetype: 'application/json'
             }
         };
         for (var key in types) {
             if (types.hasOwnProperty(key)) {
                 option = L.DomUtil.create('option', '', typeInput);
                 option.value = key;
-                option.textContent = types[key].name || key;
+                option.innerHTML = types[key].name || key;
                 if (types[key].selected) option.selected = true;
             }
         }
         toggleCaveat();
+
         var download = L.DomUtil.create('a', 'button', container);
-        download.textContent = L._('Download data');
+        download.innerHTML = L._('Download data');
         L.DomEvent.on(download, 'click', function () {
             var type = types[typeInput.value],
                 content = type.formatter(this),
@@ -689,6 +904,7 @@ L.U.Map.include({
             var blob = new Blob([content], {type: type.filetype});
             download.href = window.URL.createObjectURL(blob);
         }, this);
+
         this.ui.openPanel({data: {html: container}});
     },
 
@@ -721,22 +937,22 @@ L.U.Map.include({
             submitInput = L.DomUtil.create('input', '', container),
             map = this, option,
             types = ['geojson', 'csv', 'gpx', 'kml', 'osm', 'georss', 'umap'];
-        title.textContent = L._('Import data');
+        title.innerHTML = L._('Import data');
         fileInput.type = 'file';
         fileInput.multiple = 'multiple';
         submitInput.type = 'button';
         submitInput.value = L._('Import');
         submitInput.className = 'button';
-        typeLabel.textContent = L._('Choose the format of the data to import');
+        typeLabel.innerHTML = L._('Choose the format of the data to import');
         this.help.button(typeLabel, 'importFormats');
         var typeInput = L.DomUtil.create('select', '', typeLabel);
         typeInput.name = 'format';
-        layerLabel.textContent = L._('Choose the layer to import in');
+        layerLabel.innerHTML = L._('Choose the layer to import in');
         var layerInput = L.DomUtil.create('select', '', layerLabel);
         layerInput.name = 'datalayer';
         urlInput.type = 'text';
         urlInput.placeholder = L._('Provide an URL here');
-        rawInput.placeholder = L._('Paste your data here');
+        rawInput.placeholder = L._('Paste here your data');
         clearLabel.textContent = L._('Replace layer content');
         var clearFlag = L.DomUtil.create('input', '', clearLabel);
         clearFlag.type = 'checkbox';
@@ -746,22 +962,22 @@ L.U.Map.include({
                 var id = L.stamp(datalayer);
                 option = L.DomUtil.create('option', '', layerInput);
                 option.value = id;
-                option.textContent = datalayer.options.name;
+                option.innerHTML = datalayer.options.name;
             }
         });
-        L.DomUtil.element('option', {value: '', textContent: L._('Import in a new layer')}, layerInput);
-        L.DomUtil.element('option', {value: '', textContent: L._('Choose the data format')}, typeInput);
+        L.DomUtil.element('option', {value: '', innerHTML: L._('Import in a new layer')}, layerInput);
+        L.DomUtil.element('option', {value: '', innerHTML: L._('Choose the data format')}, typeInput);
         for (var i = 0; i < types.length; i++) {
             option = L.DomUtil.create('option', '', typeInput);
-            option.value = option.textContent = types[i];
+            option.value = option.innerHTML = types[i];
         }
         if (this.options.importPresets.length) {
             var noPreset = L.DomUtil.create('option', '', presetSelect);
-            noPreset.value = noPreset.textContent = L._('Choose a preset');
+            noPreset.value = noPreset.innerHTML = L._('Choose a preset');
             for (var j = 0; j < this.options.importPresets.length; j++) {
                 option = L.DomUtil.create('option', '', presetSelect);
                 option.value = this.options.importPresets[j].url;
-                option.textContent = this.options.importPresets[j].label;
+                option.innerHTML = this.options.importPresets[j].label;
             }
         } else {
             presetBox.style.display = 'none';
@@ -879,17 +1095,177 @@ L.U.Map.include({
         });
     },
 
+    _openBrowser: function () {
+
+        this._controls.openWMS.openManageWMS()
+    },  
+
+
+    goToFrontPage: function(){
+        window.location.href =('http://balticexplorer.eu');
+    },
+
+
+    goToUserGuide: function(){
+        window.open('http://balticexplorer.eu/static/umap/BalticExplorerUserGuide.pdf', '_new');
+    },
+
+    displayHelp: function () {
+
+        const container = L.DomUtil.create('div', 'umap-help');
+
+        L.DomUtil.create('hr', '', container);
+
+        const iconContainer = L.DomUtil.create('div', 'umap-help');
+
+        const homeLink = L.DomUtil.create('li', 'homeLink', iconContainer),
+              homeLabel = L.DomUtil.create('span', '', homeLink);
+        L.DomEvent
+            .on(homeLink, 'click', this.goToFrontPage, this);
+            
+        const helpLink = L.DomUtil.create('li', 'helpLink', iconContainer),
+              helpLabel = L.DomUtil.create('div', '', helpLink);
+        L.DomEvent
+            .on(helpLink, 'click', this.displayHelp, this);
+
+        const infoLink = L.DomUtil.create('li', 'infoLink', iconContainer),
+              infoLabel = L.DomUtil.create('div', '', infoLink);
+        L.DomEvent
+            .on(infoLink, 'click', this.displayAcknoledgements, this);
+
+        this.ui.openPanel({data: {html: container}, className: 'umap-caption', actions: [infoLink, helpLink, homeLink]});
+
+        helpLink.style.boxShadow = "0 0px 0px rgba(0, 0, 0, 0)";
+    },
+
+    displayAcknoledgements: function () {
+
+        if (document.getElementById('umap-ui-container').classList.contains('info-panel')) {
+            this.ui.closePanel();
+            return;
+        }   
+
+        const container = L.DomUtil.create('div', 'umap-caption');
+
+        L.DomUtil.create('hr', '', container);
+
+        const workLink = L.DomUtil.create('button', 'panel-button-halfwidth', container),
+              workLabel = L.DomUtil.create('span', '', workLink);
+        workLabel.innerHTML = workLabel.title = L._('About this workspace'); 
+        L.DomEvent
+            .on(workLink, 'click', this.displayCaption, this);
+            
+        if (this.options.user != undefined) {
+            if (this.permissions.options.owner == null) {
+                const editLink = L.DomUtil.create('button', 'panel-button-halfwidth', container),
+                      editLabel = L.DomUtil.create('span', '', editLink);
+                editLabel.innerHTML = editLabel.title = L._('Edit Workspace'); 
+                L.DomEvent
+                    .on(editLink, 'click', this.edit, this);
+            } else {
+                if (this.permissions.options.owner.id === this.options.user.id) {
+                    const editLink = L.DomUtil.create('button', 'panel-button-halfwidth', container),
+                          editLabel = L.DomUtil.create('span', '', editLink);
+                    editLabel.innerHTML = editLabel.title = L._('Edit Workspace'); 
+                    L.DomEvent
+                        .on(editLink, 'click', this.edit, this);
+                }                
+            }
+
+        }
+
+
+
+        L.DomUtil.create('hr', '', container);    
+
+        const imgBasmati = document.createElement('img');
+        imgBasmati.setAttribute('id', 'imgBasmati');
+        imgBasmati.src = '/static/umap/img/basmati_logo.svg';
+        container.appendChild(imgBasmati);
+
+        const basmatiLinks = L.DomUtil.create('p', '', container),
+            projurls = {
+                basmati: 'http://bonusbasmati.eu',
+            };
+        basmatiLinks.innerHTML = L._('Project website: <a href="{basmati}">bonusbasmati.eu</a>', projurls);
+
+        L.DomUtil.create('hr', '', container);
+
+        L.DomUtil.add('p', 'fundingText', container, L._('BONUS BASMATI project has received funding from BONUS (Art 185), funded jointly by the EU and Innovation Fund Denmark, Swedish Research Council Formas, Academy of Finland, Latvian Ministry of Education and Science, and Forschungszentrum Jülich GmbH (Germany).'));
+        const imgEU = document.createElement('img'),
+              imgBONUS = document.createElement('img');
+        imgBONUS.setAttribute('id', 'imgBONUS');
+        imgEU.setAttribute('id', 'imgEU');
+        imgBONUS.src = '/static/umap/img/BONUS_logo.svg';
+        imgEU.src = '/static/umap/img/eu_logo.svg';
+        container.appendChild(imgBONUS);
+        container.appendChild(imgEU);
+
+        L.DomUtil.create('hr', '', container);
+        const umapCredit = L.DomUtil.create('p', '', container),
+            urls = {
+                leaflet: 'http://leafletjs.com',
+                django: 'https://www.djangoproject.com',
+                umap: 'http://umap.openstreetmap.fr/en/'
+            };
+        umapCredit.innerHTML = L._('Baltic Explorer uses open source software components from third party vendors including: <a href="{umap}">uMap project</a>, <a href="{leaflet}">Leaflet</a> and <a href="{django}">Django</a>', urls);
+
+        L.DomUtil.create('hr', '', container);
+
+        const feedbackForm = document.createElement('iframe');
+        feedbackForm.setAttribute('id', 'feedbackForm');
+        feedbackForm.src = "https://docs.google.com/forms/d/e/1FAIpQLSfPBjNYSHruKoYg9QLex4F6oTXFhoG9rjlyUiQ04t_BlF5tNg/viewform?embedded=true";
+        feedbackForm.width="300";
+        feedbackForm.height="490";
+        feedbackForm.frameborder="0";
+        feedbackForm.marginheight="0";
+        feedbackForm.marginwidth="0";
+        container.appendChild(feedbackForm);
+     
+        //Shows the buttons at the top
+        const iconContainer = L.DomUtil.create('div', 'umap-help');
+
+        const homeLink = L.DomUtil.create('li', 'homeLink', iconContainer),
+              homeLabel = L.DomUtil.create('span', '', homeLink);
+        L.DomEvent
+            .on(homeLink, 'click', this.goToFrontPage, this);
+            
+        const helpLink = L.DomUtil.create('li', 'helpLink', iconContainer),
+              helpLabel = L.DomUtil.create('div', '', helpLink);
+        L.DomEvent
+            .on(helpLink, 'click', this.goToUserGuide, this);
+
+        const infoLink = L.DomUtil.create('li', 'infoLink', iconContainer),
+              infoLabel = L.DomUtil.create('div', '', infoLink);
+        L.DomEvent
+            .on(infoLink, 'click', this.displayAcknoledgements, this);
+
+        this.ui.openPanel({data: {html: container}, className: 'umap-caption', actions: [infoLink, helpLink, homeLink]});
+
+        infoLink.style.boxShadow = "0 0px 0px rgba(0, 0, 0, 0)";
+    },
+
+
     displayCaption: function () {
-        var container = L.DomUtil.create('div', 'umap-caption'),
-            title = L.DomUtil.create('h3', '', container);
-        title.textContent = this.options.name;
+
+
+
+        var container = L.DomUtil.create('div', 'umap-caption');
+
+        L.DomUtil.create('hr', '', container);   
+
+        var title = L.DomUtil.create('h3', '', container);
+        title.innerHTML = this.options.name;
         this.permissions.addOwnerLink('h5', container);
         if (this.options.description) {
             var description = L.DomUtil.create('div', 'umap-map-description', container);
             description.innerHTML = L.Util.toHTML(this.options.description);
         }
+        L.DomUtil.create('hr', '', container);
         var datalayerContainer = L.DomUtil.create('div', 'datalayer-container', container);
-        this.eachVisibleDataLayer(function (datalayer) {
+            datatitle = L.DomUtil.create('h5', '', datalayerContainer);
+        datatitle.innerHTML = 'Feature layers:';
+        this.eachBrowsableDataLayer(function (datalayer) {
             var p = L.DomUtil.create('p', '', datalayerContainer),
                 color = L.DomUtil.create('span', 'datalayer-color', p),
                 headline = L.DomUtil.create('strong', '', p),
@@ -903,41 +1279,57 @@ L.U.Map.include({
             datalayer.renderToolbox(headline);
             L.DomUtil.add('span', '', headline, datalayer.options.name + ' ');
         });
-        var creditsContainer = L.DomUtil.create('div', 'credits-container', container),
-            credits = L.DomUtil.createFieldset(creditsContainer, L._('Credits'));
-        title = L.DomUtil.add('h5', '', credits, L._('User content credits'));
-        if (this.options.shortCredit || this.options.longCredit) {
-            L.DomUtil.add('p', '', credits, L.Util.toHTML(this.options.longCredit || this.options.shortCredit));
-        }
-        if (this.options.licence) {
-            var licence = L.DomUtil.add('p', '', credits, L._('Map user content has been published under licence') + ' '),
-                link = L.DomUtil.add('a', '', licence, this.options.licence.name);
-            link.href = this.options.licence.url;
-        } else {
-            L.DomUtil.add('p', '', credits, L._('No licence has been set'));
-        }
-        L.DomUtil.create('hr', '', credits);
-        title = L.DomUtil.create('h5', '', credits);
-        title.textContent = L._('Map background credits');
-        var tilelayerCredit = L.DomUtil.create('p', '', credits),
-            name = L.DomUtil.create('strong', '', tilelayerCredit),
-            attribution = L.DomUtil.create('span', '', tilelayerCredit);
-        name.textContent = this.selected_tilelayer.options.name + ' ';
-        attribution.innerHTML = this.selected_tilelayer.getAttribution();
-        L.DomUtil.create('hr', '', credits);
-        var umapCredit = L.DomUtil.create('p', '', credits),
-            urls = {
-                leaflet: 'http://leafletjs.com',
-                django: 'https://www.djangoproject.com',
-                umap: 'http://wiki.openstreetmap.org/wiki/UMap'
-            };
-        umapCredit.innerHTML = L._('Powered by <a href="{leaflet}">Leaflet</a> and <a href="{django}">Django</a>, glued by <a href="{umap}">uMap project</a>.', urls);
+
+        L.DomUtil.create('hr', '', container);
+
+        const wmstitle = L.DomUtil.create('h5', '', container);
+        wmstitle.innerHTML = L._('Overlays on map:');
+        const wmslayerCredit = L.DomUtil.create('p', '', container);
+
+        const WMSAttribution = [];
+        for (let i in this.options.openWMS) {
+            const name = L.DomUtil.create('strong', '', wmslayerCredit),
+                  attribution = L.DomUtil.create('span', '', wmslayerCredit);
+            name.innerHTML = this.options.openWMS[i].name + ': ';
+            attribution.innerHTML = this.options.openWMS[i].attribution + '<br>';            
+        }   
+
+        L.DomUtil.create('hr', '', container);
+
+        const bgmtitle = L.DomUtil.create('h5', '', container);
+        bgmtitle.innerHTML = L._('Background map:');
+        const tilelayerCredit = L.DomUtil.create('p', '', container),
+              name = L.DomUtil.create('strong', '', tilelayerCredit),
+              attribution = L.DomUtil.create('span', '', tilelayerCredit);
+        name.innerHTML = this.selected_tilelayer.options.name + ' ';
+        attribution.innerHTML = this.selected_tilelayer.getAttribution() + '\n';
+
         var browser = L.DomUtil.create('li', '');
-        L.DomUtil.create('i', 'umap-icon-16 umap-list', browser);
         var label = L.DomUtil.create('span', '', browser);
-        label.textContent = label.title = L._('Browse data');
+        label.innerHTML = label.title = L._('Browse data');
         L.DomEvent.on(browser, 'click', this.openBrowser, this);
-        this.ui.openPanel({data: {html: container}, actions: [browser]});
+
+
+     
+        //Shows the buttons at the top
+        const iconContainer = L.DomUtil.create('div', 'umap-help');
+
+        const homeLink = L.DomUtil.create('li', 'homeLink', iconContainer),
+              homeLabel = L.DomUtil.create('span', '', homeLink);
+        L.DomEvent
+            .on(homeLink, 'click', this.goToFrontPage, this);
+            
+        const helpLink = L.DomUtil.create('li', 'helpLink', iconContainer),
+              helpLabel = L.DomUtil.create('div', '', helpLink);
+        L.DomEvent
+            .on(helpLink, 'click', this.goToUserGuide, this);
+
+        const infoLink = L.DomUtil.create('li', 'infoLink', iconContainer),
+              infoLabel = L.DomUtil.create('div', '', infoLink);
+        L.DomEvent
+            .on(infoLink, 'click', this.displayAcknoledgements, this);
+
+        this.ui.openPanel({data: {html: container}, className: 'umap-caption', actions: [infoLink, helpLink, homeLink]});
     },
 
     eachDataLayer: function (method, context) {
@@ -953,12 +1345,8 @@ L.U.Map.include({
         }
     },
 
-    eachBrowsableDataLayer: function (method, context) {
+    eachBrowsableDataLayer: function (method, context, filter) {
         this.eachDataLayerReverse(method, context, function (d) { return d.allowBrowse(); });
-    },
-
-    eachVisibleDataLayer: function (method, context) {
-        this.eachDataLayerReverse(method, context, function (d) { return d.isVisible(); });
     },
 
     findDataLayer: function (method, context) {
@@ -984,6 +1372,7 @@ L.U.Map.include({
         this.dirty_datalayers = [];
         this.updateDatalayersControl();
         this.initTileLayers();
+        this.initWMSLayers();
         this.isDirty = false;
     },
 
@@ -1019,10 +1408,12 @@ L.U.Map.include({
         'displayPopupFooter',
         'onLoadPanel',
         'tilelayersControl',
+        'openWMSControl',
         'name',
         'description',
         'licence',
         'tilelayer',
+        'openWMS',
         'limitBounds',
         'color',
         'iconClass',
@@ -1043,7 +1434,6 @@ L.U.Map.include({
         'sortKey',
         'labelKey',
         'filterKey',
-        'slugKey',
         'showLabel',
         'labelDirection',
         'labelInteractive',
@@ -1052,13 +1442,20 @@ L.U.Map.include({
         'zoomControl',
         'datalayersControl',
         'searchControl',
+        'legendControl',
         'locateControl',
         'fullscreenControl',
         'editinosmControl',
         'embedControl',
         'measureControl',
         'tilelayersControl',
-        'easing'
+        'protoControl',
+        'infoControl',
+        'easing',
+        'epsg',
+        'proj',
+        'resolutions',
+        'origin'
     ],
 
     exportOptions: function () {
@@ -1074,7 +1471,6 @@ L.U.Map.include({
     serialize: function () {
         var umapfile = {
             type: 'umap',
-            uri: window.location.href,
             properties: this.exportOptions(),
             geometry: this.geometry(),
             layers: []
@@ -1117,15 +1513,17 @@ L.U.Map.include({
                 if (history && history.pushState) history.pushState({}, this.options.name, data.url);
                 else window.location = data.url;
                 if (data.info) msg = data.info;
-                else msg = L._('Map has been saved!');
+                else msg = L._('Workspace has been saved!');
                 this.once('saved', function () {
                     this.isDirty = false;
                     this.ui.alert({content: msg, level: 'info', duration: duration});
                 });
-                this.ui.closePanel();
                 this.permissions.save();
+                this.ui.closePanel();
+                
             }
         });
+
     },
 
     getEditUrl: function() {
@@ -1154,8 +1552,42 @@ L.U.Map.include({
 
     defaultDataLayer: function () {
         var datalayer, fallback;
+        if (this.lastUsedDataLayer == undefined) {
+            this.lastUsedDataLayer = this.datalayers[0];
+        }
+        
+        if (this.options.user && this.permissions.options.owner) {
+            if (this.options.user.id != this.permissions.options.owner.id) {
+                this.eachDataLayer(function (datalayerX) {
+                    if (datalayerX.options.name == this.options.user.name && datalayerX.isVisible()) {
+                        this.lastUsedDataLayer = datalayerX;
+                    }          
+                }, this); 
+                if (this.lastUsedDataLayer.options.name != this.options.user.name) {
+                    this.eachDataLayer(function (datalayerH) {
+                        if (datalayerH.options.name == this.options.user.name) {
+                            this.lastUsedDataLayer = datalayerH;
+                        }          
+                    }, this);                    
+                }
+            }
+        } else {
+            this.eachDataLayer(function (datalayerX) {
+                if (datalayerX.options.name == "Anonymous user") {
+                    this.lastUsedDataLayer = datalayerX;
+                }
+            }, this); 
+            if (this.lastUsedDataLayer != undefined) {
+                if (this.lastUsedDataLayer.options.name != "Anonymous user") {
+                    this.lastUsedDataLayer = this.createDataLayer({name: "Anonymous user"});
+                }
+            }
+        }
         datalayer = this.lastUsedDataLayer;
         if (datalayer && !datalayer.isRemoteLayer() && datalayer.canBrowse() && datalayer.isVisible()) {
+            return datalayer;
+        } else if (datalayer && !datalayer.isRemoteLayer() && datalayer.canBrowse()) {
+            datalayer.toggle();
             return datalayer;
         }
         datalayer = this.findDataLayer(function (datalayer) {
@@ -1178,34 +1610,28 @@ L.U.Map.include({
     },
 
     edit: function () {
-        if(!this.editEnabled) return;
-        var container = L.DomUtil.create('div','umap-edit-container'),
+        var container = L.DomUtil.create('div'),
             metadataFields = [
                 'options.name',
                 'options.description'
             ],
             title = L.DomUtil.create('h4', '', container);
-        title.textContent = L._('Edit map properties');
+        title.innerHTML = L._('Edit map properties');
+
         var builder = new L.U.FormBuilder(this, metadataFields);
         var form = builder.build();
         container.appendChild(form);
         var UIFields = [];
-        for (var i = 0; i < this.HIDDABLE_CONTROLS.length; i++) {
-            UIFields.push('options.' + this.HIDDABLE_CONTROLS[i] + 'Control');
-        }
+
         UIFields = UIFields.concat([
-            'options.moreControl',
-            'options.scrollWheelZoom',
-            'options.miniMap',
-            'options.scaleControl',
             'options.onLoadPanel',
-            'options.displayPopupFooter',
-            'options.captionBar'
         ]);
+        
         builder = new L.U.FormBuilder(this, UIFields, {
             callback: this.renderControls,
             callbackContext: this
         });
+         
         var controlsOptions = L.DomUtil.createFieldset(container, L._('User interface options'));
         controlsOptions.appendChild(builder.build());
 
@@ -1219,7 +1645,7 @@ L.U.Map.include({
             'options.fillColor',
             'options.fillOpacity'
         ];
-
+        
         builder = new L.U.FormBuilder(this, shapeOptions, {
             callback: function (e) {
                 this.eachDataLayer(function (datalayer) {
@@ -1227,67 +1653,6 @@ L.U.Map.include({
                 });
             }
         });
-        var defaultShapeProperties = L.DomUtil.createFieldset(container, L._('Default shape properties'));
-        defaultShapeProperties.appendChild(builder.build());
-
-        var optionsFields = [
-            'options.smoothFactor',
-            'options.dashArray',
-            'options.zoomTo',
-            ['options.easing', {handler: 'Switch', label: L._('Advanced transition')}],
-            'options.labelKey',
-            ['options.sortKey', {handler: 'BlurInput', helpEntries: 'sortKey', placeholder: L._('Default: name'), label: L._('Sort key'), inheritable: true}],
-            ['options.filterKey', {handler: 'Input', helpEntries: 'filterKey', placeholder: L._('Default: name'), label: L._('Filter keys'), inheritable: true}],
-            ['options.slugKey', {handler: 'BlurInput', helpEntries: 'slugKey', placeholder: L._('Default: name'), label: L._('Feature identifier key')}]
-        ];
-
-        builder = new L.U.FormBuilder(this, optionsFields, {
-            callback: function (e) {
-                this.eachDataLayer(function (datalayer) {
-                    if (e.helper.field === 'options.sortKey') datalayer.reindex();
-                    datalayer.redraw();
-                });
-            }
-        });
-        var defaultProperties = L.DomUtil.createFieldset(container, L._('Default properties'));
-        defaultProperties.appendChild(builder.build());
-
-        var popupFields = [
-            'options.popupShape',
-            'options.popupTemplate',
-            'options.popupContentTemplate',
-            'options.showLabel',
-            'options.labelDirection',
-            'options.labelInteractive'
-        ];
-        builder = new L.U.FormBuilder(this, popupFields, {
-            callback: function (e) {
-                if (e.helper.field === 'options.popupTemplate' || e.helper.field === 'options.popupContentTemplate' || e.helper.field === 'options.popupShape') return;
-                this.eachDataLayer(function (datalayer) {
-                    datalayer.redraw();
-                })
-            }
-        });
-        var popupFieldset = L.DomUtil.createFieldset(container, L._('Default interaction options'));
-        popupFieldset.appendChild(builder.build());
-
-        if (!L.Util.isObject(this.options.tilelayer)) {
-            this.options.tilelayer = {};
-        }
-        var tilelayerFields = [
-            ['options.tilelayer.name', {handler: 'BlurInput', placeholder: L._('display name')}],
-            ['options.tilelayer.url_template', {handler: 'BlurInput', helpText: L._('Supported scheme') + ': http://{s}.domain.com/{z}/{x}/{y}.png', placeholder: 'url'}],
-            ['options.tilelayer.maxZoom', {handler: 'BlurIntInput', placeholder: L._('max zoom')}],
-            ['options.tilelayer.minZoom', {handler: 'BlurIntInput', placeholder: L._('min zoom')}],
-            ['options.tilelayer.attribution', {handler: 'BlurInput', placeholder: L._('attribution')}],
-            ['options.tilelayer.tms', {handler: 'Switch', label: L._('TMS format')}]
-        ];
-        var customTilelayer = L.DomUtil.createFieldset(container, L._('Custom background'));
-        builder = new L.U.FormBuilder(this, tilelayerFields, {
-            callback: this.initTileLayers,
-            callbackContext: this
-        });
-        customTilelayer.appendChild(builder.build());
 
         if (!L.Util.isObject(this.options.limitBounds)) {
             this.options.limitBounds = {};
@@ -1329,79 +1694,105 @@ L.U.Map.include({
             this.handleLimitBounds();
         }, this);
 
-        var slideshow = L.DomUtil.createFieldset(container, L._('Slideshow'));
-        var slideshowFields = [
-            ['options.slideshow.active', {handler: 'Switch', label: L._('Activate slideshow mode')}],
-            ['options.slideshow.delay', {handler: 'SlideshowDelay', helpText: L._('Delay between two transitions when in play mode')}],
-            ['options.slideshow.easing', {handler: 'Switch', label: L._('Smart transitions'), inheritable: true}],
-            ['options.slideshow.autoplay', {handler: 'Switch', label: L._('Autostart when map is loaded')}]
-        ];
-        var slideshowHandler = function () {
-            this.slideshow.setOptions(this.options.slideshow);
-            this.renderControls();
-        };
-        var slideshowBuilder = new L.U.FormBuilder(this, slideshowFields, {
-            callback: slideshowHandler,
-            callbackContext: this
-        });
-        slideshow.appendChild(slideshowBuilder.build());
-
-        var credits = L.DomUtil.createFieldset(container, L._('Credits'));
-        var creditsFields = [
-            ['options.licence', {handler: 'LicenceChooser', label: L._('licence')}],
-            ['options.shortCredit', {handler: 'Input', label: L._('Short credits'), helpEntries: ['shortCredit', 'textFormatting']}],
-            ['options.longCredit', {handler: 'Textarea', label: L._('Long credits'), helpEntries: ['longCredit', 'textFormatting']}]
-        ];
-        var creditsBuilder = new L.U.FormBuilder(this, creditsFields, {
-            callback: function () {this._controls.attribution._update();},
-            callbackContext: this
-        });
-        credits.appendChild(creditsBuilder.build());
-
         var advancedActions = L.DomUtil.createFieldset(container, L._('Advanced actions'));
+
         var advancedButtons = L.DomUtil.create('div', 'button-bar half', advancedActions);
         var del = L.DomUtil.create('a', 'button umap-delete', advancedButtons);
         del.href = '#';
-        del.textContent = L._('Delete');
+        del.innerHTML = L._('Delete');
         L.DomEvent
             .on(del, 'click', L.DomEvent.stop)
             .on(del, 'click', this.del, this);
+
+        var center = L.DomUtil.create('a', 'button umap-clone', advancedButtons);
+        center.href = '#';
+        center.innerHTML = L._('Save view');
+        center.title = L._('Show this view when opening this workspace');
+        L.DomEvent
+            .on(center, 'click', L.DomEvent.stop)
+            .on(center, 'click', this.updateExtent, this);
+
         var clone = L.DomUtil.create('a', 'button umap-clone', advancedButtons);
         clone.href = '#';
-        clone.textContent = L._('Clone');
+        clone.innerHTML = L._('Clone');
         clone.title = L._('Clone this map');
         L.DomEvent
             .on(clone, 'click', L.DomEvent.stop)
             .on(clone, 'click', this.clone, this);
+
         var empty = L.DomUtil.create('a', 'button umap-empty', advancedButtons);
         empty.href = '#';
-        empty.textContent = L._('Empty');
+        empty.innerHTML = L._('Empty');
         empty.title = L._('Delete all layers');
         L.DomEvent
             .on(empty, 'click', L.DomEvent.stop)
             .on(empty, 'click', this.empty, this);
+
         var download = L.DomUtil.create('a', 'button umap-download', advancedButtons);
         download.href = '#';
-        download.textContent = L._('Download');
+        download.innerHTML = L._('Download');
         download.title = L._('Open download panel');
         L.DomEvent
             .on(download, 'click', L.DomEvent.stop)
             .on(download, 'click', this.renderShareBox, this);
-        this.ui.openPanel({data: {html: container}, className: 'dark'});
+
+
+        var buttonImport = L.DomUtil.create('div', 'button umap-download', advancedButtons);
+        buttonImport.href = '#';
+        buttonImport.innerHTML = buttonImport.title = L._('Import data');
+        L.DomEvent
+            .on(buttonImport, 'click', L.DomEvent.stop)
+            .on(buttonImport, 'click', this.importPanel, this);
+
+
+
+        const editPermissions = L.DomUtil.create('button', 'panel-button-options', container),
+              editPermLabel = L.DomUtil.create('span', '', editPermissions);
+        editPermLabel.innerHTML = editPermLabel.title = L._('Edit permissions'); 
+        L.DomEvent
+            .on(
+                editPermissions, 
+                'click', 
+                this.permissions.edit, 
+                this.permissions);
+
+    this.ui.openPanel({data: {html: container}, className: 'dark'});
     },
+    
+    toggleEdit: function() {
+        if (this.editEnabled == true){
+            this.disableEdit();
+        }
+        else  {
+            this.enableEdit();
+        }
+    },    
 
     enableEdit: function() {
+        if (document.getElementById('umap-ui-container').classList.contains('info-panel')) {
+            this.ui.closePanel();
+            return;
+        }   
         L.DomUtil.addClass(document.body, 'umap-edit-enabled');
         this.editEnabled = true;
         this.fire('edit:enabled');
-    },
+        const pen = document.getElementById('drawingPen')
+        L.DomUtil.removeClass(pen, 'leaflet-control-edit-enable');
+        L.DomUtil.addClass(pen, 'leaflet-control-edit-disable');
+},
 
     disableEdit: function() {
-        if (this.isDirty) return;
+        if (this.isDirty) {
+            //return;
+            this.askForReset();
+        }
         L.DomUtil.removeClass(document.body, 'umap-edit-enabled');
         this.editedFeature = null;
         this.editEnabled = false;
         this.fire('edit:disabled');
+        const pen = document.getElementById('drawingPen');
+        L.DomUtil.addClass(pen, 'leaflet-control-edit-enable');
+        L.DomUtil.removeClass(pen, 'leaflet-control-edit-disable');
     },
 
     getDisplayName: function () {
@@ -1413,15 +1804,15 @@ L.U.Map.include({
             name = L.DomUtil.create('h3', '', container);
         L.DomEvent.disableClickPropagation(container);
         this.permissions.addOwnerLink('span', container);
-        var about = L.DomUtil.add('a', 'umap-about-link', container, ' — ' + L._('About'));
-        about.href = '#';
+        var about = L.DomUtil.add('a', 'umap-about-link', container, ' — ' + L._('About this map'));
+        about.href = '#'; 
         L.DomEvent.on(about, 'click', this.displayCaption, this);
         var browser = L.DomUtil.add('a', 'umap-open-browser-link', container, ' | ' + L._('Browse data'));
         browser.href = '#';
         L.DomEvent.on(browser, 'click', L.DomEvent.stop)
                   .on(browser, 'click', this.openBrowser, this);
         var setName = function () {
-            name.textContent = this.getDisplayName();
+            name.innerHTML = this.getDisplayName();
         };
         L.bind(setName, this)();
         this.on('postsync', L.bind(setName, this));
@@ -1431,50 +1822,19 @@ L.U.Map.include({
     },
 
     initEditBar: function () {
-        var container = L.DomUtil.create('div', 'umap-main-edit-toolbox with-transition dark', this._controlContainer),
-            title = L.DomUtil.add('h3', '', container, L._('Editing') + '&nbsp;'),
-            name = L.DomUtil.create('a', 'umap-click-to-edit', title),
-            setName = function () {
-                name.textContent = this.getDisplayName();
-            };
-        L.bind(setName, this)();
-        L.DomEvent.on(name, 'click', this.edit, this);
-        this.on('postsync', L.bind(setName, this));
-        this.help.button(title, 'edit');
-        var save = L.DomUtil.create('a', 'leaflet-control-edit-save button', container);
-        save.href = '#';
-        save.title = L._('Save current edits') + ' (Ctrl+S)';
-        save.textContent = L._('Save');
-        var cancel = L.DomUtil.create('a', 'leaflet-control-edit-cancel button', container);
-        cancel.href = '#';
-        cancel.title = L._('Cancel edits');
-        cancel.textContent = L._('Cancel');
-        var disable = L.DomUtil.create('a', 'leaflet-control-edit-disable', container);
-        disable.href = '#';
-        disable.title = disable.textContent = L._('Disable editing');
-
-
-        L.DomEvent
-            .addListener(disable, 'click', L.DomEvent.stop)
-            .addListener(disable, 'click', function (e) {
-                this.disableEdit(e);
-                this.ui.closePanel();
-            }, this);
-
-        L.DomEvent
-            .addListener(save, 'click', L.DomEvent.stop)
-            .addListener(save, 'click', this.save, this);
-
-        L.DomEvent
-            .addListener(cancel, 'click', L.DomEvent.stop)
-            .addListener(cancel, 'click', this.askForReset, this);
+ 
     },
 
     askForReset: function (e) {
         if (!confirm(L._('Are you sure you want to cancel your changes?'))) return;
+
         this.reset();
         this.disableEdit(e);
         this.ui.closePanel();
+        location.reload();
+
+
+
     },
 
     startMarker: function () {
@@ -1533,7 +1893,6 @@ L.U.Map.include({
 
     initContextMenu: function () {
         this.contextmenu = new L.U.ContextMenu(this);
-        this.contextmenu.enable();
     },
 
     setContextMenuItems: function (e) {
@@ -1560,22 +1919,23 @@ L.U.Map.include({
             if (this.editEnabled) {
                 if (!this.isDirty) {
                     items.push({
-                        text: L._('Stop editing') + ' (Ctrl+E)',
+                        text: L._('Stop editing') + '',
                         callback: this.disableEdit
                     });
                 }
                 if (this.options.enableMarkerDraw) {
                     items.push(
                         {
-                            text: L._('Draw a marker') + ' (Ctrl+M)',
+                            text: L._('Draw a marker') + '',
                             callback: this.startMarker,
                             context: this
                         });
                 }
+
                 if (this.options.enablePolylineDraw) {
                     items.push(
                         {
-                            text: L._('Draw a polygon') + ' (Ctrl+P)',
+                            text: L._('Draw a polygon') + '',
                             callback: this.startPolygon,
                             context: this
                         });
@@ -1583,19 +1943,17 @@ L.U.Map.include({
                 if (this.options.enablePolygonDraw) {
                     items.push(
                       {
-                           text: L._('Draw a line') + ' (Ctrl+L)',
+                           text: L._('Draw a line') + '',
                            callback: this.startPolyline,
                            context: this
                        });
                 }
+
                 items.push('-');
-                items.push({
-                    text: L._('Help'),
-                    callback: function () { this.help.show('edit');}
-                });
+
             } else {
                 items.push({
-                    text: L._('Start editing') + ' (Ctrl+E)',
+                    text: L._('Start editing') /*+ '' */,
                     callback: this.enableEdit
                 });
             }
@@ -1608,20 +1966,10 @@ L.U.Map.include({
             {
                 text: L._('About'),
                 callback: this.displayCaption
-            },
-            {
-                text: L._('Search location'),
-                callback: this.search
             }
+
         );
-        if (this.options.urls.routing) {
-            items.push('-',
-                {
-                    text: L._('Directions from here'),
-                    callback: this.openExternalRouting
-                }
-            );
-        }
+
         this.options.contextmenuItems = items;
     },
 

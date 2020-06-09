@@ -164,7 +164,7 @@ L.U.Icon.Cluster = L.DivIcon.extend({
             div = L.DomUtil.create('div', '', container),
             span = L.DomUtil.create('span', '', div),
             backgroundColor = this.datalayer.getColor();
-        span.textContent = this.cluster.getChildCount();
+        span.innerHTML = this.cluster.getChildCount();
         div.style.backgroundColor = backgroundColor;
         return container;
     },

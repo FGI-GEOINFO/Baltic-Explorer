@@ -50,8 +50,8 @@ L.FormBuilder.Element.include({
     buildLabel: function () {
         if (this.options.label) {
             this.label = L.DomUtil.create('label', '', this.getLabelParent());
-            this.label.textContent = this.label.title = this.options.label;
-            if (this.options.helpEntries) this.builder.map.help.button(this.label, this.options.helpEntries);
+            this.label.innerHTML = this.label.title = this.options.label;
+            if (this.options.helpEntries) /* CK Remove the help button from forms | this.builder.map.help.button(this.label, this.options.helpEntries)*/ ;
             else if (this.options.helpTooltip) {
                 var info = L.DomUtil.create('i', 'info', this.label);
                 L.DomEvent.on(info, 'mouseover', function () {
@@ -91,37 +91,14 @@ L.FormBuilder.CheckBox.include({
 L.FormBuilder.ColorPicker = L.FormBuilder.Input.extend({
 
     colors: [
-        'Black', 'Navy', 'DarkBlue', 'MediumBlue', 'Blue', 'DarkGreen',
-        'Green', 'Teal', 'DarkCyan', 'DeepSkyBlue', 'DarkTurquoise',
-        'MediumSpringGreen', 'Lime', 'SpringGreen', 'Aqua', 'Cyan',
-        'MidnightBlue', 'DodgerBlue', 'LightSeaGreen', 'ForestGreen',
-        'SeaGreen', 'DarkSlateGray', 'DarkSlateGrey', 'LimeGreen',
-        'MediumSeaGreen', 'Turquoise', 'RoyalBlue', 'SteelBlue',
-        'DarkSlateBlue', 'MediumTurquoise', 'Indigo', 'DarkOliveGreen',
-        'CadetBlue', 'CornflowerBlue', 'MediumAquaMarine', 'DimGray',
-        'DimGrey', 'SlateBlue', 'OliveDrab', 'SlateGray', 'SlateGrey',
-        'LightSlateGray', 'LightSlateGrey', 'MediumSlateBlue', 'LawnGreen',
-        'Chartreuse', 'Aquamarine', 'Maroon', 'Purple', 'Olive', 'Gray',
-        'Grey', 'SkyBlue', 'LightSkyBlue', 'BlueViolet', 'DarkRed',
-        'DarkMagenta', 'SaddleBrown', 'DarkSeaGreen', 'LightGreen',
-        'MediumPurple', 'DarkViolet', 'PaleGreen', 'DarkOrchid',
-        'YellowGreen', 'Sienna', 'Brown', 'DarkGray', 'DarkGrey',
-        'LightBlue', 'GreenYellow', 'PaleTurquoise', 'LightSteelBlue',
-        'PowderBlue', 'FireBrick', 'DarkGoldenRod', 'MediumOrchid',
-        'RosyBrown', 'DarkKhaki', 'Silver', 'MediumVioletRed', 'IndianRed',
-        'Peru', 'Chocolate', 'Tan', 'LightGray', 'LightGrey', 'Thistle',
-        'Orchid', 'GoldenRod', 'PaleVioletRed', 'Crimson', 'Gainsboro',
-        'Plum', 'BurlyWood', 'LightCyan', 'Lavender', 'DarkSalmon',
-        'Violet', 'PaleGoldenRod', 'LightCoral', 'Khaki', 'AliceBlue',
-        'HoneyDew', 'Azure', 'SandyBrown', 'Wheat', 'Beige', 'WhiteSmoke',
-        'MintCream', 'GhostWhite', 'Salmon', 'AntiqueWhite', 'Linen',
-        'LightGoldenRodYellow', 'OldLace', 'Red', 'Fuchsia', 'Magenta',
-        'DeepPink', 'OrangeRed', 'Tomato', 'HotPink', 'Coral', 'DarkOrange',
-        'LightSalmon', 'Orange', 'LightPink', 'Pink', 'Gold', 'PeachPuff',
-        'NavajoWhite', 'Moccasin', 'Bisque', 'MistyRose', 'BlanchedAlmond',
-        'PapayaWhip', 'LavenderBlush', 'SeaShell', 'Cornsilk',
-        'LemonChiffon', 'FloralWhite', 'Snow', 'Yellow', 'LightYellow',
-        'Ivory', 'White'
+        
+        '#2525a3', '#2595a3', '#25a340', '#9fa325', '#a47624', '#a32525', '#a3258e', '#7724a4', 'Black', '#a8a8a8',
+        '#5353d9', '#54c9d8', '#54d870', '#d4d854', '#d9a953', '#d85454', '#d854c2', '#aa53d9',  '#404040','#d9d9d9',
+        '#a5a5eb', '#a5e3eb', '#a5ebb4', '#e9eba5', '#ebd2a5', '#eba5a5', '#eba5df', '#d2a5eb', '#6a6a6a','White'
+    ],
+
+    colorsBlind: [
+        '#332288', '#117733', '#44AA99', '#88CCEE', '#DDCC77', '#CC6677', '#AA4499', '#882255', 'Black', 'White'
     ],
 
     getParentNode: function () {
@@ -132,11 +109,23 @@ L.FormBuilder.ColorPicker = L.FormBuilder.Input.extend({
     build: function () {
         L.FormBuilder.Input.prototype.build.call(this);
         this.input.placeholder = this.options.placeholder || L._('Inherit');
+ 
+        colorBlindPaletteLabel = L.DomUtil.create('p', 'color-blind-label', this.extendedContainer);
+        colorBlindPaletteLabel.innerHTML = "Color blind friedly palette";
+        this.containerColorBlind = L.DomUtil.create('div', 'umap-color-picker', this.extendedContainer);
+        this.containerColorBlind.style.display = 'block';
+        for (var idx in this.colorsBlind) {
+            this.addColorBlindColors(this.colorsBlind[idx]);
+        }
+        
+        colorPaletteLabel = L.DomUtil.create('p', 'color-palette-label', this.extendedContainer);
+        colorPaletteLabel.innerHTML = "Extended color palette";
         this.container = L.DomUtil.create('div', 'umap-color-picker', this.extendedContainer);
-        this.container.style.display = 'none';
+        this.container.style.display = 'block';
         for (var idx in this.colors) {
             this.addColor(this.colors[idx]);
         }
+
         this.spreadColor();
         this.input.autocomplete = 'off';
         L.DomEvent.on(this.input, 'focus', this.onFocus, this);
@@ -153,9 +142,8 @@ L.FormBuilder.ColorPicker = L.FormBuilder.Input.extend({
     onBlur: function () {
         var self = this,
             closePicker = function () {
-                self.container.style.display = 'none';
+                self.container.style.display = 'block';
             };
-        // We must leave time for the click to be listened.
         window.setTimeout(closePicker, 100);
     },
 
@@ -175,7 +163,18 @@ L.FormBuilder.ColorPicker = L.FormBuilder.Input.extend({
         var updateColorInput = function () {
             this.input.value = colorName;
             this.sync();
-            this.container.style.display = 'none';
+            this.container.style.display = 'block';
+        };
+        L.DomEvent.on(span, 'mousedown', updateColorInput, this);
+    },
+
+    addColorBlindColors: function (colorName) {
+        var span = L.DomUtil.create('span', '', this.containerColorBlind);
+        span.style.backgroundColor = span.title = colorName;
+        var updateColorInput = function () {
+            this.input.value = colorName;
+            this.sync();
+            this.containerColorBlind.style.display = 'block';
         };
         L.DomEvent.on(span, 'mousedown', updateColorInput, this);
     }
@@ -259,9 +258,41 @@ L.FormBuilder.DataLayerSwitcher = L.FormBuilder.Select.extend({
 
     getOptions: function () {
         var options = [];
+        if (this.builder.map.permissions.options.owner != null) {
+            var ownerId = this.builder.map.permissions.options.owner.id;
+        } else {
+            var ownerId = undefined;
+        }
+        if (this.builder.map.options.user) {
+            var userName = this.builder.map.options.user.name;
+            var userId = this.builder.map.options.user.id;
+        } else {
+            var userName = undefined;
+            var userId = undefined;
+        }
         this.builder.map.eachDataLayerReverse(function (datalayer) {
             if(datalayer.isLoaded() && !datalayer.isRemoteLayer() && datalayer.canBrowse()) {
-                options.push([L.stamp(datalayer), datalayer.getName()]);
+                if(userName != undefined && userId != ownerId) {
+                    if(userName == datalayer.getName()) {
+                        if (datalayer.options.description && datalayer.options.description != "undefined") {
+                            options.push([L.stamp(datalayer), datalayer.getName() + ":" + datalayer.options.description]);
+                        } else {
+                            options.push([L.stamp(datalayer), datalayer.getName()]);
+                        }
+                        
+                    }
+                } else if (userName == undefined) {
+                    if (datalayer.getName() == "Anonymous user") {
+                        options.push([L.stamp(datalayer), datalayer.getName()]);
+                    }
+                    
+                } else {
+                    if (datalayer.options.description && datalayer.options.description != "undefined") {
+                        options.push([L.stamp(datalayer), datalayer.getName() + ":" + datalayer.options.description]);
+                    } else {
+                        options.push([L.stamp(datalayer), datalayer.getName()]);
+                    }
+                }
             }
         });
         return options;
@@ -286,8 +317,10 @@ L.FormBuilder.onLoadPanel = L.FormBuilder.Select.extend({
 
     selectOptions: [
         ['none', L._('None')],
-        ['caption', L._('Caption')],
-        ['databrowser', L._('Data browser')]
+        ['mainmenu', 'Main menu'],
+        ['caption', 'About'],
+        ['databrowser', 'Data on map'],
+        ['legend', 'Legends']
     ]
 
 });
@@ -341,7 +374,6 @@ L.FormBuilder.LicenceChooser = L.FormBuilder.Select.extend({
 
 });
 
-
 L.FormBuilder.NullableBoolean = L.FormBuilder.Select.extend({
     selectOptions: [
         [undefined, L._('inherit')],
@@ -367,7 +399,6 @@ L.FormBuilder.NullableBoolean = L.FormBuilder.Select.extend({
     }
 
 });
-
 
 L.FormBuilder.BlurInput.include({
 
@@ -415,7 +446,7 @@ L.FormBuilder.IconUrl = L.FormBuilder.BlurInput.extend({
             }
         }
         this.button = L.DomUtil.create('a', '', this.buttonsContainer);
-        this.button.textContent = this.value() ? L._('Change symbol') : L._('Add symbol');
+        this.button.innerHTML = this.value() ? L._('Change symbol') : L._('Add symbol');
         this.button.href = '#';
         L.DomEvent
             .on(this.button, 'click', L.DomEvent.stop)
@@ -457,7 +488,7 @@ L.FormBuilder.IconUrl = L.FormBuilder.BlurInput.extend({
             this.addIconPreview(data.pictogram_list[idx]);
         }
         var cancelButton = L.DomUtil.create('a', '', this.pictogramsContainer);
-        cancelButton.textContent = L._('Cancel');
+        cancelButton.innerHTML = L._('Cancel');
         cancelButton.href = '#';
         cancelButton.style.display = 'block';
         cancelButton.style.clear = 'both';
@@ -468,7 +499,7 @@ L.FormBuilder.IconUrl = L.FormBuilder.BlurInput.extend({
                 this.udpatePreview();
             }, this);
         var customButton = L.DomUtil.create('a', '', this.pictogramsContainer);
-        customButton.textContent = L._('Set symbol');
+        customButton.innerHTML = L._('Set symbol');
         customButton.href = '#';
         customButton.style.display = 'block';
         customButton.style.clear = 'both';
@@ -607,7 +638,6 @@ L.FormBuilder.ControlChoice = L.FormBuilder.TernaryChoices.extend({
 
 });
 
-
 L.FormBuilder.LabelChoice = L.FormBuilder.TernaryChoices.extend({
 
     default: false,
@@ -661,7 +691,6 @@ L.FormBuilder.Range = L.FormBuilder.Input.extend({
 
 });
 
-
 L.FormBuilder.ManageOwner = L.FormBuilder.Element.extend({
 
     build: function () {
@@ -687,9 +716,7 @@ L.FormBuilder.ManageOwner = L.FormBuilder.Element.extend({
         this.set();
     }
 
-
 });
-
 
 L.FormBuilder.ManageEditors = L.FormBuilder.Element.extend({
 
@@ -734,9 +761,10 @@ L.U.FormBuilder = L.FormBuilder.extend({
     },
 
     defaultOptions: {
-        name: {label: L._('name')},
-        description: {label: L._('description'), handler: 'Textarea', helpEntries: 'textFormatting'},
-        color: {handler: 'ColorPicker', label: L._('color'), helpEntries: 'colorValue', inheritable: true},
+        name: {label: L._('Name')},
+        description: {label: L._('Description'), handler: 'Textarea', helpEntries: 'textFormatting'},
+        comments: {label: L._('Comments'), handler: 'Textarea', helpEntries: 'textFormatting'},
+        color: {handler: 'ColorPicker', label: L._('Color'), helpEntries: 'colorValue', inheritable: true},
         opacity: {handler: 'Range', min: 0.1, max: 1, step: 0.1, label: L._('opacity'), inheritable: true},
         stroke: {handler: 'Switch', label: L._('stroke'), helpEntries: 'stroke', inheritable: true},
         weight: {handler: 'Range', min: 1, max: 20, step: 1, label: L._('weight'), inheritable: true},
@@ -750,7 +778,7 @@ L.U.FormBuilder = L.FormBuilder.extend({
         popupShape: {handler: 'PopupShape', label: L._('Popup shape'), inheritable: true},
         popupTemplate: {handler: 'PopupContent', label: L._('Popup content style'), inheritable: true},
         popupContentTemplate: {label: L._('Popup content template'), handler: 'Textarea', helpEntries: ['dynamicProperties', 'textFormatting'], placeholder: '# {name}', inheritable: true},
-        datalayer: {handler: 'DataLayerSwitcher', label: L._('Choose the layer of the feature')},
+        datalayer: {handler: 'DataLayerSwitcher', label: L._('Choose the layer for the feature')},
         moreControl: {handler: 'Switch', label: L._('Do you want to display the «more» control?')},
         scrollWheelZoom: {handler: 'Switch', label: L._('Allow scroll wheel zoom?')},
         miniMap: {handler: 'Switch', label: L._('Do you want to display a minimap?')},

@@ -48,27 +48,38 @@ L.U.MapPermissions = L.Class.extend({
     },
 
     edit: function () {
-        if (!this.map.options.umap_id) return this.map.ui.alert({content: L._('Please save the map first'), level: 'info'});
+        if (!this.map.options.umap_id) return this.map.ui.alert({content: L._('Please save the map before'), level: 'info'});
         var container = L.DomUtil.create('div', 'permissions-panel'),
-            fields = [],
-            title = L.DomUtil.create('h4', '', container);
+            fields = [];
+            
+		var title = L.DomUtil.create('h4', '', container);
+
         if (this.isAnonymousMap()) {
             if (this.options.anonymous_edit_url) {
                 var helpText = L._('Secret edit link is:<br>{link}', {link: this.options.anonymous_edit_url});
-                fields.push(['options.edit_status', {handler: 'IntSelect', label: L._('Who can edit'), selectOptions: this.map.options.anonymous_edit_statuses, helpText: helpText}]);
+                fields.push(['options.edit_status', {handler: 'IntSelect', label: L._('Who can EDIT this Workspace:'), selectOptions: this.map.options.anonymous_edit_statuses, helpText: helpText}]);
             }
         } else {
             if (this.isOwner()) {
-                fields.push(['options.edit_status', {handler: 'IntSelect', label: L._('Who can edit'), selectOptions: this.map.options.edit_statuses}]);
-                fields.push(['options.share_status', {handler: 'IntSelect', label: L._('Who can view'), selectOptions: this.map.options.share_statuses}]);
-                fields.push(['options.owner', {handler: 'ManageOwner', label: L._("Map's owner")}]);
+				fields.push(['options.share_status', {handler: 'IntSelect', label: L._('Who can VIEW this Workspace:'), selectOptions: this.map.options.share_statuses}]);
+				fields.push(['options.edit_status', {handler: 'IntSelect', label: L._('Who can EDIT this Workspace:'), selectOptions: this.map.options.edit_statuses}]);
+                // fields.push(['options.owner', {handler: 'ManageOwner', label: L._("Workspace's owner")}]);
             }
-            fields.push(['options.editors', {handler: 'ManageEditors', label: L._("Map's editors")}]);
+            fields.push(['options.editors', {handler: 'ManageEditors', label: L._("Add EDITORS to Workspace:")}]);
         }
-        title.textContent = L._('Update permissions');
+        title.innerHTML = L._('Update permissions');
+		
         var builder = new L.U.FormBuilder(this, fields);
         var form = builder.build();
         container.appendChild(form);
+
+		var URL_title = L.DomUtil.create('h4', '', container);
+		URL_title.innerHTML = 'URL to share this workspace';
+		
+		var link_to_workspace = L.DomUtil.create('input', 'formbox', container);     
+		link_to_workspace.value = window.location.href;     
+		link_to_workspace.readOnly = true;
+
         if (this.isAnonymousMap() && this.map.options.user) {
             // We have a user, and this user has come through here, so they can edit the map, so let's allow to own the map.
             // Note: real check is made on the back office anyway.
@@ -76,11 +87,31 @@ L.U.MapPermissions = L.Class.extend({
             var advancedButtons = L.DomUtil.create('div', 'button-bar', advancedActions);
             var download = L.DomUtil.create('a', 'button', advancedButtons);
             download.href = '#';
-            download.textContent = L._('Attach the map to my account');
+            download.innerHTML = L._('Attach the map to my account');
             L.DomEvent
                 .on(download, 'click', L.DomEvent.stop)
                 .on(download, 'click', this.attach, this);
         }
+
+        const permissionsTootip = L.DomUtil.create('div', 'opened-WMS-tooltip', container);
+        permissionsTootip.href = '#';
+        permissionsTootip.title = L._('Public workspaces are shown on the Baltic Explorer front page for everyone. Hidden workspaces are listed only in My Workspaces and are accessible for anyone with the URL. Private workspaces are listed only in My Workspaces.');
+
+        const permissionsTootipText = L.DomUtil.create('div', 'opened-WMS-tooltip-text', container);
+        permissionsTootipText.innerHTML = 'Public workspaces are shown on the Baltic Explorer front page for everyone. Hidden workspaces are listed only in My Workspaces and are accessible for anyone with the URL. Private workspaces are listed only in My Workspaces.';
+        permissionsTootipText.href = '#';
+
+        L.DomEvent
+            .on(permissionsTootip, 'click', function(){
+                if (permissionsTootipText.style.display == 'none') {
+                    permissionsTootipText.style.display = '';
+                }
+
+                else{
+                    permissionsTootipText.style.display = 'none';
+                }
+            });
+
         this.map.ui.openPanel({data: {html: container}, className: 'dark'});
     },
 
@@ -130,7 +161,7 @@ L.U.MapPermissions = L.Class.extend({
             var ownerContainer = L.DomUtil.add(element, 'umap-map-owner', container, ' ' + L._('by') + ' '),
                 owner = L.DomUtil.create('a');
             owner.href = this.options.owner.url;
-            owner.textContent = this.options.owner.name;
+            owner.innerHTML = this.options.owner.name;
             ownerContainer.appendChild(owner);
         }
     }

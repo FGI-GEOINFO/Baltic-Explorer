@@ -32,7 +32,6 @@ L.U.FeatureMixin = {
             });
         }
         catch (e) {
-            // Certainly IE8, which has a limited version of defineProperty
         }
         this.preInit();
         this.addInteractions();
@@ -45,17 +44,8 @@ L.U.FeatureMixin = {
         return this.datalayer && this.datalayer.isRemoteLayer();
     },
 
-    getSlug: function () {
-        return this.properties[this.map.options.slugKey || 'name'] || '';
-    },
-
-    getPermalink: function () {
-        const slug = this.getSlug();
-        if (slug) return L.Util.getBaseUrl() + "?" + L.Util.buildQueryString({feature: slug}) + window.location.hash;
-    },
-
     view: function(e) {
-        if (this.map.editEnabled) return;
+        if (this.map.editEnabled && this.datalayer.options.name == this.map.options.user.name) return;
         var outlink = this.properties._umap_options.outlink,
             target = this.properties._umap_options.outlinkTarget
         if (outlink) {
@@ -73,19 +63,19 @@ L.U.FeatureMixin = {
         }
         // TODO deal with an event instead?
         if (this.map.slideshow) this.map.slideshow.current = this;
-        this.map.currentFeature = this;
         this.attachPopup();
         this.openPopup(e && e.latlng || this.getCenter());
     },
 
     openPopup: function () {
-        if (this.map.editEnabled) return;
+        if (this.map.editEnabled && this.datalayer.options.name == this.map.options.user.name) return;
         this.parentClass.prototype.openPopup.apply(this, arguments);
     },
 
     edit: function(e) {
         if(!this.map.editEnabled || this.isReadOnly()) return;
-        var container = L.DomUtil.create('div', 'umap-datalayer-container');
+        var container = L.DomUtil.create('div');
+            title = L.DomUtil.add('h3', '', container, L._('Feature properties'));
 
         var builder = new L.U.FormBuilder(this, ['datalayer'], {
             callback: function () {this.edit(e);}  // removeLayer step will close the edit panel, let's reopen it
@@ -95,10 +85,11 @@ L.U.FeatureMixin = {
         var properties = [], property;
         for (var i = 0; i < this.datalayer._propertiesIndex.length; i++) {
             property = this.datalayer._propertiesIndex[i];
-            if (L.Util.indexOf(['name', 'description'], property) !== -1) {continue;}
+            if (L.Util.indexOf(['name', 'description', 'comments'], property) !== -1) {continue;}
             properties.push(['properties.' + property, {label: property}]);
         }
         // We always want name and description for now (properties management to come)
+        properties.unshift('properties.comments');
         properties.unshift('properties.description');
         properties.unshift('properties.name');
         builder = new L.U.FormBuilder(this, properties,
@@ -109,8 +100,6 @@ L.U.FeatureMixin = {
         );
         container.appendChild(builder.build());
         this.appendEditFieldsets(container);
-        var advancedActions = L.DomUtil.createFieldset(container, L._('Advanced actions'));
-        this.getAdvancedEditActions(advancedActions);
         this.map.ui.openPanel({data: {html: container}, className: 'dark'});
         this.map.editedFeature = this;
         if (!this.isOnScreen()) this.bringToCenter(e);
@@ -119,7 +108,7 @@ L.U.FeatureMixin = {
     getAdvancedEditActions: function (container) {
         var deleteLink = L.DomUtil.create('a', 'button umap-delete', container);
         deleteLink.href = '#';
-        deleteLink.textContent = L._('Delete');
+        deleteLink.innerHTML = L._('Delete');
         L.DomEvent.on(deleteLink, 'click', function (e) {
             L.DomEvent.stop(e);
             if (this.confirmDelete()) this.map.ui.closePanel();
@@ -132,23 +121,8 @@ L.U.FeatureMixin = {
             id: 'umap-feature-shape-properties',
             callback: this._redraw
         });
-        var shapeProperties = L.DomUtil.createFieldset(container, L._('Shape properties'));
-        shapeProperties.appendChild(builder.build());
-
-        var advancedOptions = this.getAdvancedOptions();
-        var builder = new L.U.FormBuilder(this, advancedOptions, {
-            id: 'umap-feature-advanced-properties',
-            callback: this._redraw
-        });
-        var advancedProperties = L.DomUtil.createFieldset(container, L._('Advanced properties'));
-        advancedProperties.appendChild(builder.build());
-
-        var interactionOptions = this.getInteractionOptions();
-        builder = new L.U.FormBuilder(this, interactionOptions, {
-            callback: this._redraw
-        });
-        var popupFieldset = L.DomUtil.createFieldset(container, L._('Interaction options'));
-        popupFieldset.appendChild(builder.build());
+        var shapeProperties = L.DomUtil.createFieldset(container, L._('Feature style'));
+        shapeProperties.appendChild(builder.build()); 
 
     },
 
@@ -167,9 +141,6 @@ L.U.FeatureMixin = {
     getDisplayName: function (fallback) {
         if (fallback === undefined) fallback = this.datalayer.options.name;
         var key = this.getOption('labelKey') || 'name';
-        // Variables mode.
-        if (key.indexOf("{") != -1) return L.Util.greedyTemplate(key, this.extendedProperties());
-        // Simple mode.
         return this.properties[key] || this.properties.title || fallback;
     },
 
@@ -316,24 +287,64 @@ L.U.FeatureMixin = {
 
     _onClick: function (e) {
         if (this.map.measureTools && this.map.measureTools.enabled()) return;
+
         this._popupHandlersAdded = true;  // Prevent leaflet from managing event
-        if(!this.map.editEnabled) {
-            this.view(e);
-        } else if (!this.isReadOnly()) {
-            if(e.originalEvent.shiftKey) {
-                if(this._toggleEditing)
-                    this._toggleEditing(e);
-                else
-                    this.edit(e);
-            }
-            else {
-                new L.Toolbar.Popup(e.latlng, {
-                    className: 'leaflet-inplace-toolbar',
-                    anchor: this.getPopupToolbarAnchor(),
-                    actions: this.getInplaceToolbarActions(e)
-                }).addTo(this.map, this, e.latlng);
+
+        if (this.map.options.user != undefined) {
+            if(!this.map.editEnabled || this.datalayer.options.name != this.map.options.user.name) {
+                if (this.map.editEnabled && !this.isReadOnly() && this.map.permissions.options.owner.id == this.map.options.user.id){
+                    if(e.originalEvent.shiftKey) {
+                        if(this._toggleEditing)
+                            this._toggleEditing(e);
+                        else
+                            this.edit(e);
+                    } else {
+                        new L.Toolbar.Popup(e.latlng, {
+                            className: 'leaflet-inplace-toolbar',
+                            anchor: this.getPopupToolbarAnchor(),
+                            actions: this.getInplaceToolbarActions(e)
+                        }).addTo(this.map, this, e.latlng);
+                    }
+                } else {
+                    this.view(e);
+                }
+            } else if (!this.isReadOnly() && this.datalayer.options.name == this.map.options.user.name) {
+                if(e.originalEvent.shiftKey) {
+                    if(this._toggleEditing)
+                        this._toggleEditing(e);
+                    else
+                        this.edit(e);
+                }
+                else {
+                    new L.Toolbar.Popup(e.latlng, {
+                        className: 'leaflet-inplace-toolbar',
+                        anchor: this.getPopupToolbarAnchor(),
+                        actions: this.getInplaceToolbarActions(e)
+                    }).addTo(this.map, this, e.latlng);
+                }
+            } 
+
+        } else {
+            if (!this.map.editEnabled || this.datalayer.options.name != "Anonymous user") {
+                this.view(e)
+            } else {
+                                if(e.originalEvent.shiftKey) {
+                    if(this._toggleEditing)
+                        this._toggleEditing(e);
+                    else
+                        this.edit(e);
+                }
+                else {
+                    new L.Toolbar.Popup(e.latlng, {
+                        className: 'leaflet-inplace-toolbar',
+                        anchor: this.getPopupToolbarAnchor(),
+                        actions: this.getInplaceToolbarActions(e)
+                    }).addTo(this.map, this, e.latlng);
+                }
             }
         }
+
+
         L.DomEvent.stop(e);
     },
 
@@ -346,10 +357,6 @@ L.U.FeatureMixin = {
     },
 
     _showContextMenu: function (e) {
-        L.DomEvent.stop(e);
-        var pt = this.map.mouseEventToContainerPoint(e.originalEvent);
-        e.relatedTarget = this;
-        this.map.contextmenu.showAt(pt, e);
     },
 
     makeDirty: function () {
@@ -361,9 +368,7 @@ L.U.FeatureMixin = {
     },
 
     getContextMenuItems: function (e) {
-        var permalink = this.getPermalink(),
-            items = [];
-        if (permalink) items.push({text: L._('Permalink'), callback: function() {window.open(permalink);}});
+        var items = [];
         if (this.map.editEnabled && !this.isReadOnly()) {
             items = items.concat(this.getContextMenuEditItems(e));
         }
@@ -503,16 +508,16 @@ L.U.Marker = L.Marker.extend({
     },
 
     _enableDragging: function () {
-        // TODO: start dragging after 1 second on mouse down
-        if(this.map.editEnabled) {
-            if (!this.editEnabled()) this.enableEdit();
-            // Enabling dragging on the marker override the Draggable._OnDown
-            // event, which, as it stopPropagation, refrain the call of
-            // _onDown with map-pane element, which is responsible to
-            // set the _moved to false, and thus to enable the click.
-            // We should find a cleaner way to handle this.
-            this.map.dragging._draggable._moved = false;
+        if (this.map.options.user != undefined) {
+            if (this.map.options.user.name == this.datalayer.options.name || this.map.options.user.id == this.map.permissions.options.owner.id) {
+                if(this.map.editEnabled) {
+                    if (!this.editEnabled()) this.enableEdit();
+
+                    this.map.dragging._draggable._moved = false;
+                }
+            }
         }
+
     },
 
     _disableDragging: function () {
@@ -567,7 +572,6 @@ L.U.Marker = L.Marker.extend({
         return [
             'properties._umap_options.color',
             'properties._umap_options.iconClass',
-            'properties._umap_options.iconUrl'
         ];
     },
 
@@ -590,8 +594,7 @@ L.U.Marker = L.Marker.extend({
             },
             callbackContext: this
         });
-        var fieldset = L.DomUtil.createFieldset(container, L._('Coordinates'));
-        fieldset.appendChild(builder.build());
+
     },
 
     bringToCenter: function (e) {
@@ -613,7 +616,6 @@ L.U.Marker = L.Marker.extend({
     }
 
 });
-
 
 L.U.PathMixin = {
 
@@ -703,8 +705,6 @@ L.U.PathMixin = {
     },
 
     onRemove: function (map) {
-        // this.map.off('showmeasure', this.showMeasureTooltip, this);
-        // this.map.off('hidemeasure', this.removeTooltip, this);
         if (this.editing && this.editing.enabled()) this.editing.removeHooks();
         L.U.FeatureMixin.onRemove.call(this, map);
     },
@@ -877,7 +877,7 @@ L.U.Polyline = L.Polyline.extend({
                 });
             } else if (index === 0 || index === e.vertex.getLastIndex()) {
                 items.push({
-                    text: L._('Continue line (Ctrl+Click)'),
+                    text: L._('Continue line'),
                     callback: e.vertex.continue,
                     context: e.vertex.continue
                 });
@@ -909,7 +909,7 @@ L.U.Polyline = L.Polyline.extend({
         L.U.FeatureMixin.getAdvancedEditActions.call(this, container);
         var toPolygon = L.DomUtil.create('a', 'button umap-to-polygon', container);
         toPolygon.href = '#';
-        toPolygon.textContent = L._('Transform to polygon');
+        toPolygon.innerHTML = L._('Transform to polygon');
         L.DomEvent.on(toPolygon, 'click', this.toPolygon, this);
     },
 
@@ -1044,7 +1044,7 @@ L.U.Polygon = L.Polygon.extend({
         L.U.FeatureMixin.getAdvancedEditActions.call(this, container);
         var toPolyline = L.DomUtil.create('a', 'button umap-to-polyline', container);
         toPolyline.href = '#';
-        toPolyline.textContent = L._('Transform to lines');
+        toPolyline.innerHTML = L._('Transform to lines');
         L.DomEvent.on(toPolyline, 'click', this.toPolyline, this);
     },
 

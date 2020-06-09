@@ -26,6 +26,7 @@ L.U.Popup = L.Popup.extend({
         if (!els.length && this.container.textContent.replace('\n', '') === '') {
             this.container.innerHTML = '';
             L.DomUtil.add('h3', '', this.container, this.feature.getDisplayName());
+            L.DomUtil.add('input', '', this.container);
         }
     },
 
@@ -55,9 +56,8 @@ L.U.Popup.Panel = L.U.Popup.extend({
 
     allButton: function () {
         var button = L.DomUtil.create('li', '');
-        L.DomUtil.create('i', 'umap-icon-16 umap-list', button);
         var label = L.DomUtil.create('span', '', button);
-        label.textContent = label.title = L._('See all');
+        label.innerHTML = label.title = L._('See all');
         L.DomEvent.on(button, 'click', this.feature.map.openBrowser, this.feature.map);
         return button;
     },
@@ -94,7 +94,7 @@ L.U.PopupTemplate.Default = L.Class.extend({
 
     renderBody: function () {
         var template = this.feature.getOption('popupContentTemplate'),
-            container = L.DomUtil.create('div', 'umap-popup-container'),
+            container = L.DomUtil.create('div', ''),
             content = '', properties, center;
         properties = this.feature.extendedProperties();
         // Resolve properties inside description
@@ -107,8 +107,7 @@ L.U.PopupTemplate.Default = L.Class.extend({
 
     renderFooter: function () {
         if (this.feature.hasPopupFooter()) {
-            var footerContainer = L.DomUtil.create('div', 'umap-footer-container', this.container),
-                footer = L.DomUtil.create('ul', 'umap-popup-footer', footerContainer),
+            var footer = L.DomUtil.create('ul', 'umap-popup-footer', this.container),
                 previousLi = L.DomUtil.create('li', 'previous', footer),
                 zoomLi = L.DomUtil.create('li', 'zoom', footer),
                 nextLi = L.DomUtil.create('li', 'next', footer),
@@ -145,7 +144,7 @@ L.U.PopupTemplate.BaseWithTitle = L.U.PopupTemplate.Default.extend({
         var title;
         if (this.feature.getDisplayName()) {
             title = L.DomUtil.create('h3', 'popup-title');
-            title.textContent = this.feature.getDisplayName();
+            title.innerHTML = L.Util.escapeHTML(this.feature.getDisplayName());
         }
         return title;
     }
@@ -196,8 +195,6 @@ L.U.PopupTemplate.GeoRSSImage = L.U.PopupTemplate.BaseWithTitle.extend({
         if (this.feature.properties.img) {
             var img = L.DomUtil.create('img', '', container);
             img.src = this.feature.properties.img;
-            // Sadly, we are unable to override this from JS the clean way
-            // See https://github.com/Leaflet/Leaflet/commit/61d746818b99d362108545c151a27f09d60960ee#commitcomment-6061847
             img.style.maxWidth = this.options.maxWidth + 'px';
             img.style.maxHeight = this.options.maxWidth + 'px';
             this.onElementLoaded(img);

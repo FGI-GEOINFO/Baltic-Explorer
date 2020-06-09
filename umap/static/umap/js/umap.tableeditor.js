@@ -34,7 +34,7 @@ L.U.TableEditor = L.Class.extend({
         };
         var doRename = function () {
             var newName = prompt(L._('Please enter the new name of this property'), property);
-            if (!newName || !this.validateName(newName)) return;
+            if (!newName) return;
             this.datalayer.eachLayer(function (feature) {
                 feature.renameProperty(property, newName);
             });
@@ -73,14 +73,6 @@ L.U.TableEditor = L.Class.extend({
         this.properties = this.datalayer._propertiesIndex;
     },
 
-    validateName: function (name) {
-        if (name.indexOf(".") !== -1) {
-            this.datalayer.map.ui.alert({content: L._('Invalide property name: {name}', {name: name}), level: 'error'});
-            return false;
-        }
-        return true;
-    },
-
     edit: function () {
         var id = 'tableeditor:edit';
         this.datalayer.map.fire('dataloading', {id: id});
@@ -91,10 +83,10 @@ L.U.TableEditor = L.Class.extend({
         var addButton = L.DomUtil.create('li', 'add-property');
         L.DomUtil.create('i', 'umap-icon-16 umap-add', addButton);
         var label = L.DomUtil.create('span', '', addButton);
-        label.textContent = label.title = L._('Add a new property');
+        label.innerHTML = label.title = L._('Add a new property');
         var addProperty = function () {
             var newName = prompt(L._('Please enter the name of the property'));
-            if (!newName || !this.validateName(newName)) return;
+            if (!newName) return;
             this.datalayer.indexProperty(newName);
             this.edit();
         };

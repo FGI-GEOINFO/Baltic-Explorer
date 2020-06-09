@@ -27,6 +27,16 @@ L.U.UI = L.Evented.extend({
     },
 
     openPanel: function (e) {
+        leafletRight = document.getElementsByClassName("leaflet-right");
+        if (leafletRight.length > 0) {
+            
+            if (L.DomUtil.hasClass(leafletRight[0], 'leaflet-right-wide')) {
+                var i
+                for (i=0; i < leafletRight.length; i++) {
+                    L.DomUtil.removeClass(leafletRight[i], "leaflet-right-wide");
+                }
+            }
+        }
         this.fire('panel:open');
         // We reset all because we can't know which class has been added
         // by previous ui processes...
@@ -39,7 +49,7 @@ L.U.UI = L.Evented.extend({
         var closeLink = L.DomUtil.create('li', 'umap-close-link', actionsContainer);
         L.DomUtil.add('i', 'umap-close-icon', closeLink);
         var label = L.DomUtil.create('span', '', closeLink);
-        label.title = label.textContent = L._('Close');
+        label.title = label.innerHTML = L._('');
         if (e.actions) {
             for (var i = 0; i < e.actions.length; i++) {
                 actionsContainer.appendChild(e.actions[i]);
@@ -62,6 +72,16 @@ L.U.UI = L.Evented.extend({
         this.resetPanelClassName();
         L.DomUtil.removeClass(this.parent, 'umap-ui');
         this.fire('panel:closed');
+        leafletRight = document.getElementsByClassName("leaflet-right");
+        if (leafletRight.length > 0) {
+            
+            if (L.DomUtil.hasClass(leafletRight[0], 'leaflet-right-wide')) {
+                var i
+                for (i=0; i < leafletRight.length; i++) {
+                    L.DomUtil.removeClass(leafletRight[i], "leaflet-right-wide");
+                }
+            }
+        }
     },
 
     alert: function (e) {
@@ -92,7 +112,7 @@ L.U.UI = L.Evented.extend({
         closeLink.href = '#';
         L.DomUtil.add('i', 'umap-close-icon', closeLink);
         var label = L.DomUtil.create('span', '', closeLink);
-        label.title = label.textContent = L._('Close');
+        label.title = label.innerHTML = L._('');
         L.DomEvent.on(closeLink, 'click', L.DomEvent.stop)
                   .on(closeLink, 'click', close, this);
         L.DomUtil.add('div', '', this._alert, e.content);
@@ -102,7 +122,7 @@ L.U.UI = L.Evented.extend({
                 action = e.actions[i];
                 el = L.DomUtil.element('a', {'className': 'umap-action'}, this._alert);
                 el.href = '#';
-                el.textContent = action.label;
+                el.innerHTML = action.label;
                 L.DomEvent.on(el, 'click', L.DomEvent.stop)
                           .on(el, 'click', close, this);
                 if (action.callback) L.DomEvent.on(el, 'click', action.callback, action.callbackContext || this.map);

@@ -81,9 +81,9 @@ L.Util.toHTML = function (r) {
     r = r.replace(/\[\[([^|]*?)\|(.*?)\]\]/g, '<a href="$1">$2</a>');
 
     // iframe
-    r = r.replace(/{{{(h_t_t_ps?[^ |{]*)}}}/g, '<div><iframe frameborder="0" src="$1" width="100%" height="300px"></iframe></div>');
-    r = r.replace(/{{{(h_t_t_ps?[^ |{]*)\|(\d*)(px)?}}}/g, '<div><iframe frameborder="0" src="$1" width="100%" height="$2px"></iframe></div>');
-    r = r.replace(/{{{(h_t_t_ps?[^ |{]*)\|(\d*)(px)?\*(\d*)(px)?}}}/g, '<div><iframe frameborder="0" src="$1" width="$4px" height="$2px"></iframe></div>');
+    r = r.replace(/{{{(h_t_t_ps?[^ |]*)}}}/g, '<iframe frameBorder="0" src="$1" width="100%" height="300px"></iframe>');
+    r = r.replace(/{{{(h_t_t_ps?[^ |]*)\|(\d*)(px)?}}}/g, '<iframe frameBorder="0" src="$1" width="100%" height="$2px"></iframe>');
+    r = r.replace(/{{{(h_t_t_ps?[^ |]*)\|(\d*)(px)?\*(\d*)(px)?}}}/g, '<iframe frameBorder="0" src="$1" width="$4px" height="$2px"></iframe>');
 
     // images
     r = r.replace(/{{([^\]|]*?)}}/g, '<img src="$1">');
@@ -173,19 +173,6 @@ L.Util.sortFeatures = function (features, sortKey) {
 L.Util.flattenCoordinates = function (coords) {
     while (coords[0] && typeof coords[0][0] !== 'number') coords = coords[0];
     return coords;
-};
-
-
-L.Util.buildQueryString = function (params) {
-    var query_string = [];
-    for (var key in params) {
-        query_string.push(encodeURIComponent(key) + '=' + encodeURIComponent(params[key]));
-    }
-    return query_string.join('&');
-};
-
-L.Util.getBaseUrl = function () {
-    return '//' + window.location.host + window.location.pathname;
 };
 
 L.DomUtil.add = function (tagName, className, container, content) {
@@ -297,16 +284,6 @@ L.U.Keys = {
     APPLE: 91,
     SHIFT: 16,
     ALT: 17,
-    CTRL: 18,
-    E: 69,
-    F: 70,
-    H: 72,
-    I: 73,
-    L: 76,
-    M: 77,
-    P: 80,
-    S: 83,
-    Z: 90
 };
 
 
@@ -319,7 +296,7 @@ L.U.Help = L.Class.extend({
         closeLink.href = '#';
         L.DomUtil.add('i', 'umap-close-icon', closeLink);
         var label = L.DomUtil.create('span', '', closeLink);
-        label.title = label.textContent = L._('Close');
+        label.title = label.innerHTML = L._('Close');
         this.content = L.DomUtil.create('div', 'umap-help-content', this.box);
         L.DomEvent.on(closeLink, 'click', this.hide, this);
     },
@@ -379,7 +356,7 @@ L.U.Help = L.Class.extend({
             L.DomEvent.on(actionContainer, 'click', action.addHooks, action);
             L.DomEvent.on(actionContainer, 'click', self.hide, self);
         };
-        title.textContent = L._('Where do we go from here?');
+        title.innerHTML = L._('Where do we go from here?');
         for (var id in this.map.helpMenuActions) {
             addAction(this.map.helpMenuActions[id]);
         }
@@ -441,7 +418,6 @@ L.U.Help = L.Class.extend({
     shortCredit: L._('Will be displayed in the bottom right corner of the map'),
     longCredit: L._('Will be visible in the caption of the map'),
     sortKey: L._('Property to use for sorting features'),
-    slugKey: L._('The name of the property to use as feature unique identifier.'),
     filterKey: L._('Comma separated list of properties to use when filtering features'),
     interactive: L._('If false, the polygon will act as a part of the underlying map.'),
     outlink: L._('Define link to open in a new window on polygon click.'),

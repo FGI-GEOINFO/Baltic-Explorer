@@ -173,7 +173,7 @@ L.U.AutoComplete = L.Class.extend({
 
     createResult: function (item) {
         var el = L.DomUtil.element('li', {}, this.container);
-        el.textContent = item.label;
+        el.innerHTML = item.label;
         var result = {
             item: item,
             el: el
@@ -279,9 +279,9 @@ L.U.AutoComplete.Ajax.SelectMultiple = L.U.AutoComplete.Ajax.extend({
 
     displaySelected: function (result) {
         var result_el = L.DomUtil.element('li', {}, this.selected_container);
-        result_el.textContent = result.item.label;
+        result_el.innerHTML = result.item.label;
         var close = L.DomUtil.element('span', {className: 'close'}, result_el);
-        close.textContent = '×';
+        close.innerHTML = '×';
         L.DomEvent.on(close, 'click', function () {
             this.selected_container.removeChild(result_el);
             this.options.on_unselect(result);
@@ -300,9 +300,9 @@ L.U.AutoComplete.Ajax.Select = L.U.AutoComplete.Ajax.extend({
 
     displaySelected: function (result) {
         var result_el = L.DomUtil.element('div', {}, this.selected_container);
-        result_el.textContent = result.item.label;
+        result_el.innerHTML = result.item.label;
         var close = L.DomUtil.element('span', {className: 'close'}, result_el);
-        close.textContent = '×';
+        close.innerHTML = '×';
         this.input.style.display = 'none';
         L.DomEvent.on(close, 'click', function () {
             this.selected_container.innerHTML = '';

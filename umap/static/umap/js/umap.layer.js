@@ -421,7 +421,6 @@ L.U.DataLayer = L.Evented.extend({
         this.layer.addLayer(feature);
         this.indexProperties(feature);
         if (this.hasDataLoaded()) this.fire('datachanged');
-        this.map.features_index[feature.getSlug()] = feature;
     },
 
     removeLayer: function (feature) {
@@ -430,7 +429,6 @@ L.U.DataLayer = L.Evented.extend({
         this._index.splice(this._index.indexOf(id), 1);
         delete this._layers[id];
         this.layer.removeLayer(feature);
-        delete this.map.features_index[feature.getSlug()];
         if (this.hasDataLoaded()) this.fire('datachanged');
     },
 
@@ -717,14 +715,27 @@ L.U.DataLayer = L.Evented.extend({
 
     edit: function () {
         if(!this.map.editEnabled || !this.isLoaded()) {return;}
-        var container = L.DomUtil.create('div', 'umap-layer-properties-container'),
-            metadataFields = [
-                'options.name',
-                'options.description',
-                ['options.type', {handler: 'LayerTypeChooser', label: L._('Type of layer')}],
-                ['options.displayOnLoad', {label: L._('Display on load'), handler: 'Switch'}],
-                ['options.browsable', {label: L._('Data is browsable'), handler: 'Switch', helpEntries: 'browsable'}]
-            ];
+        var container = L.DomUtil.create('div');
+        if (this.map.options.user) {
+            if (this.map.options.user.id == this.map.permissions.options.owner.id) {
+            var  metadataFields = [
+                    'options.name',
+                    'options.description' //,
+                    // ['options.type', {handler: 'LayerTypeChooser', label: L._('Type of layer')}],
+                    // ['options.displayOnLoad', {label: L._('Display on load'), handler: 'Switch'}],
+                    // ['options.browsable', {label: L._('Data is browsable'), handler: 'Switch', helpEntries: 'browsable'}]
+                ];            
+            } else {
+            var  metadataFields = [
+                    'options.description' //,
+                ];     
+            }            
+        } else {
+            var  metadataFields = [
+                ];     
+        }  
+
+
         var title = L.DomUtil.add('h3', '', container, L._('Layer properties'));
         var builder = new L.U.FormBuilder(this, metadataFields, {
             callback: function (e) {
@@ -761,7 +772,7 @@ L.U.DataLayer = L.Evented.extend({
             id: 'datalayer-advanced-properties',
             callback: redrawCallback
         });
-        var shapeProperties = L.DomUtil.createFieldset(container, L._('Shape properties'));
+        var shapeProperties = L.DomUtil.createFieldset(container, L._('Feature style'));
         shapeProperties.appendChild(builder.build());
 
         var optionsFields = [
@@ -777,8 +788,8 @@ L.U.DataLayer = L.Evented.extend({
             id: 'datalayer-advanced-properties',
             callback: redrawCallback
         });
-        var advancedProperties = L.DomUtil.createFieldset(container, L._('Advanced properties'));
-        advancedProperties.appendChild(builder.build());
+        /* var advancedProperties = L.DomUtil.createFieldset(container, L._('Advanced properties'));
+        advancedProperties.appendChild(builder.build()); */
 
         var popupFields = [
             'options.popupShape',
@@ -789,8 +800,8 @@ L.U.DataLayer = L.Evented.extend({
             'options.labelInteractive',
         ];
         builder = new L.U.FormBuilder(this, popupFields, {callback: redrawCallback});
-        var popupFieldset = L.DomUtil.createFieldset(container, L._('Interaction options'));
-        popupFieldset.appendChild(builder.build());
+        /* var popupFieldset = L.DomUtil.createFieldset(container, L._('Interaction options'));
+        popupFieldset.appendChild(builder.build()); */
 
         if (!L.Util.isObject(this.options.remoteData)) {
             this.options.remoteData = {};
@@ -798,8 +809,8 @@ L.U.DataLayer = L.Evented.extend({
         var remoteDataFields = [
             ['options.remoteData.url', {handler: 'Url', label: L._('Url'), helpEntries: 'formatURL'}],
             ['options.remoteData.format', {handler: 'DataFormat', label: L._('Format')}],
-            ['options.remoteData.from', {label: L._('From zoom'), helpText: L._('Optional.')}],
-            ['options.remoteData.to', {label: L._('To zoom'), helpText: L._('Optional.')}],
+            ['options.remoteData.from', {label: L._('From zoom'), helpText: L._('Optionnal.')}],
+            ['options.remoteData.to', {label: L._('To zoom'), helpText: L._('Optionnal.')}],
             ['options.remoteData.dynamic', {handler: 'Switch', label: L._('Dynamic'), helpEntries: 'dynamicRemoteData'}],
             ['options.remoteData.licence', {label: L._('Licence'), helpText: L._('Please be sure the licence is compliant with your use.')}]
         ];
@@ -808,16 +819,16 @@ L.U.DataLayer = L.Evented.extend({
             remoteDataFields.push(['options.remoteData.ttl', {handler: 'ProxyTTLSelect', label: L._('Cache proxied request')}]);
         }
 
-        var remoteDataContainer = L.DomUtil.createFieldset(container, L._('Remote data'));
+        /* var remoteDataContainer = L.DomUtil.createFieldset(container, L._('Remote data'));
         builder = new L.U.FormBuilder(this, remoteDataFields);
-        remoteDataContainer.appendChild(builder.build());
+        remoteDataContainer.appendChild(builder.build()); */
 
-        if (this.map.options.urls.datalayer_versions) this.buildVersionsFieldset(container);
+        /* if (this.map.options.urls.datalayer_versions) this.buildVersionsFieldset(container); */
 
-        var advancedActions = L.DomUtil.createFieldset(container, L._('Advanced actions'));
+        /* var advancedActions = L.DomUtil.createFieldset(container, L._('Advanced actions'));
         var advancedButtons = L.DomUtil.create('div', 'button-bar half', advancedActions);
         var deleteLink = L.DomUtil.create('a', 'button delete_datalayer_button umap-delete', advancedButtons);
-        deleteLink.textContent = L._('Delete');
+        deleteLink.innerHTML = L._('Delete');
         deleteLink.href = '#';
         L.DomEvent.on(deleteLink, 'click', L.DomEvent.stop)
                   .on(deleteLink, 'click', function () {
@@ -826,13 +837,13 @@ L.U.DataLayer = L.Evented.extend({
                 }, this);
         if (!this.isRemoteLayer()) {
             var emptyLink = L.DomUtil.create('a', 'button umap-empty', advancedButtons);
-            emptyLink.textContent = L._('Empty');
+            emptyLink.innerHTML = L._('Empty');
             emptyLink.href = '#';
             L.DomEvent.on(emptyLink, 'click', L.DomEvent.stop)
                       .on(emptyLink, 'click', this.empty, this);
         }
         var cloneLink = L.DomUtil.create('a', 'button umap-clone', advancedButtons);
-        cloneLink.textContent = L._('Clone');
+        cloneLink.innerHTML = L._('Clone');
         cloneLink.href = '#';
         L.DomEvent.on(cloneLink, 'click', L.DomEvent.stop)
                   .on(cloneLink, 'click', function () {
@@ -841,10 +852,10 @@ L.U.DataLayer = L.Evented.extend({
                 }, this);
         if (this.umap_id) {
             var download = L.DomUtil.create('a', 'button umap-download', advancedButtons);
-            download.textContent = L._('Download');
+            download.innerHTML = L._('Download');
             download.href = this._dataUrl();
             download.target = '_blank';
-        }
+        } */
         this.map.ui.openPanel({data: {html: container}, className: 'dark'});
 
     },
@@ -929,11 +940,7 @@ L.U.DataLayer = L.Evented.extend({
     },
 
     allowBrowse: function () {
-        return !!this.options.browsable && this.canBrowse() && this.isVisible();
-    },
-
-    hasData: function () {
-        return !!this._index.length;
+        return !!this.options.browsable && this.canBrowse() && this.isVisible() && this._index.length;
     },
 
     isVisible: function () {
@@ -966,7 +973,7 @@ L.U.DataLayer = L.Evented.extend({
     getPreviousBrowsable: function () {
         var id = this.getRank(), next, index = this.map.datalayers_index;
         while(id = index[++id] ? id : 0, next = index[id]) {
-            if (next === this || (next.allowBrowse() && next.hasData())) break;
+            if (next === this || next.allowBrowse()) break;
         }
         return next;
     },
@@ -974,7 +981,7 @@ L.U.DataLayer = L.Evented.extend({
     getNextBrowsable: function () {
         var id = this.getRank(), prev, index = this.map.datalayers_index;
         while(id = index[--id] ? id : index.length - 1, prev = index[id]) {
-            if (prev === this || (prev.allowBrowse() && prev.hasData())) break;
+            if (prev === this || prev.allowBrowse()) break;
         }
         return prev;
     },
@@ -1049,6 +1056,11 @@ L.U.DataLayer = L.Evented.extend({
         return this.options.name || L._('Untitled layer');
     },
 
+    getDescription: function () {
+        return this.options.description || L._('');
+    },
+
+
     tableEdit: function () {
         if (this.isRemoteLayer() || !this.isVisible()) return;
         var editor = new L.U.TableEditor(this);
@@ -1058,16 +1070,34 @@ L.U.DataLayer = L.Evented.extend({
 });
 
 L.TileLayer.include({
-
+    
     toJSON: function () {
-        return {
-            minZoom: this.options.minZoom,
-            maxZoom: this.options.maxZoom,
-            attribution: this.options.attribution,
-            url_template: this._url,
-            name: this.options.name,
-            tms: this.options.tms
-        };
+        if (!this.options.url_template.endsWith('.png')) {
+            return {
+                id: this.options.id,
+                name: this.options.name,
+                url_template: this.options.url_template,
+                url_legend: this.options.url_legend,
+                layers: this.options.layers,
+                transparent: this.options.transparent,
+                format: this.options.format,
+                minZoom: this.options.minZoom,
+                maxZoom: this.options.maxZoom,
+                attribution: this.options.attribution,
+                rank: this.options.rank,
+                wms_category: this.options.wms_category,
+                opacity: this.options.opacity,
+            };            
+        } else {
+            return {
+                minZoom: this.options.minZoom,
+                maxZoom: this.options.maxZoom,
+                attribution: this.options.attribution,
+                url_template: this.url_template,
+                name: this.options.name,
+                tms: this.options.tms
+            };            
+        }
     },
 
     getAttribution: function () {

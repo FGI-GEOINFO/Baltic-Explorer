@@ -441,7 +441,8 @@ i.info {
     height: 24px;
     line-height: 24px;
     display: inline-block;
-    background-image: url('./img/24.png');
+    background: url('./img/24.svg');
+    background-size: contain;
     vertical-align: bottom;
     content: " ";
 }
@@ -450,7 +451,8 @@ i.info {
 .dark .umap-clone:before,
 .dark .umap-edit:before, .dark .umap-download:before,
 .dark .umap-to-polyline:before {
-    background-image: url('./img/24-white.png');
+    background: url('./img/24-white.svg');
+    background-size: contain;
     vertical-align: middle;
 }
 .umap-to-polygon:before {
@@ -499,17 +501,6 @@ i.info {
 }
 .umap-edit-actions li:hover {
     background-color: #353c3e;
-}
-.permissions-panel,
-.umap-upload,
-.umap-share,
-.umap-edit-container,
-.umap-datalayer-container,
-.umap-layer-properties-container,
-.umap-footer-container,
-.umap-browse-data,
-.umap-browse-datalayers {
-    padding: 0 10px;
 }
 .umap-form-iconfield {
     position: relative;
@@ -600,7 +591,7 @@ input[type=hidden].blur + .button {
     top: 0;
     bottom: 0;
     right: -400px;
-    padding: 0 10px;
+    padding: 0 20px 40px 20px;
     border-left: 1px solid #ddd;
     overflow-x: auto;
     z-index: 1010;
@@ -656,10 +647,10 @@ input[type=hidden].blur + .button {
 }
 #umap-ui-container .body {
     clear: both;
-    height: calc(100% - 54px); /* Minus size of toolbox */
+    height: calc(100% - 46px); /* Minus size of toolbox */
 }
 #umap-ui-container .toolbox {
-    padding: 5px 10px;
+    padding: 5px 0;
     overflow: hidden;
 }
 #umap-ui-container .toolbox li {

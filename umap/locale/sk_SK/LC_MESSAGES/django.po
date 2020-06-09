@@ -10,69 +10,22 @@ msgid ""
 msgstr ""
 "Project-Id-Version: uMap\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-07 14:28+0000\n"
-"PO-Revision-Date: 2019-04-07 14:28+0000\n"
+"POT-Creation-Date: 2018-09-08 14:50+0000\n"
+"PO-Revision-Date: 2018-09-08 14:51+0000\n"
 "Last-Translator: yohanboniface <yohanboniface@free.fr>\n"
-"Language-Team: Slovak (Slovakia) (http://www.transifex.com/openstreetmap/umap/language/sk_SK/)\n"
+"Language-Team: Slovak (Slovakia) (http://www.transifex.com/yohanboniface/umap/language/sk_SK/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: sk_SK\n"
 "Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);\n"
 
-#: tmp/framacarte/templates/umap/home.html:8 umap/templates/umap/home.html:9
-#, python-format
-msgid ""
-"This is a demo instance, used for tests and pre-rolling releases. If you "
-"need a stable instance, please use <a "
-"href=\"%(stable_url)s\">%(stable_url)s</a>. You can also host your own "
-"instance, it's <a href=\"%(repo_url)s\">open source</a>!"
-msgstr "Toto je ukážková verzia, používaná na testovanie nových vydaní uMap. Ak potrebujete stabilnú verzu, použite <a href=\"%(stable_url)s\">%(stable_url)s</a>. Môžete si tiež stiahnúť celý projekt a nainštalovať ho na svoj server - je to <a href=\"%(repo_url)s\">open source</a>!"
-
-#: tmp/framacarte/templates/umap/home.html:83
-#: tmp/framacarte/templates/umap/navigation.html:14
-#: umap/templates/umap/about_summary.html:33
-#: umap/templates/umap/navigation.html:26
-msgid "Create a map"
-msgstr "Vytvoriť mapu"
-
-#: tmp/framacarte/templates/umap/navigation.html:7
-#: umap/templates/umap/navigation.html:10
-msgid "My maps"
-msgstr "Moje mapy"
-
-#: tmp/framacarte/templates/umap/navigation.html:9
-#: umap/templates/umap/navigation.html:12
-msgid "Log in"
-msgstr "Prihlásiť sa"
-
-#: tmp/framacarte/templates/umap/navigation.html:9
-#: umap/templates/umap/navigation.html:12
-msgid "Sign in"
-msgstr "Zaregistrovať sa"
-
-#: tmp/framacarte/templates/umap/navigation.html:12
-#: umap/templates/umap/navigation.html:20
-msgid "Log out"
-msgstr "Odhlásiť sa"
-
-#: tmp/framacarte/templates/umap/search_bar.html:6
-#: umap/templates/umap/search_bar.html:6
-msgid "Search maps"
-msgstr "Hľadať mapy"
-
-#: tmp/framacarte/templates/umap/search_bar.html:10
-#: tmp/framacarte/templates/umap/search_bar.html:13
-#: umap/templates/umap/search_bar.html:9
-msgid "Search"
-msgstr "Hľadať"
-
 #: umap/forms.py:40
 #, python-format
 msgid "Secret edit link is %s"
 msgstr "Tajný odkaz umožňujúci úpravu mapy je %s"
 
-#: umap/forms.py:44 umap/models.py:115
+#: umap/forms.py:44 umap/models.py:114
 msgid "Everyone can edit"
 msgstr "Hocikto môže upravovať"
 
@@ -104,87 +57,83 @@ msgstr "Vzor URL vo formáte pre dlaždice OSM"
 msgid "Order of the tilelayers in the edit box"
 msgstr "Poradie vrstiev pri úprave"
 
-#: umap/models.py:116
+#: umap/models.py:115
 msgid "Only editors can edit"
 msgstr "Upravovať môžu iba prispievatelia"
 
-#: umap/models.py:117
+#: umap/models.py:116
 msgid "Only owner can edit"
 msgstr "Upravovať môže iba vlastník"
 
-#: umap/models.py:120
+#: umap/models.py:119
 msgid "everyone (public)"
 msgstr "hocikto (verejná)"
 
-#: umap/models.py:121
+#: umap/models.py:120
 msgid "anyone with link"
 msgstr "hocikto pomocou odkazu"
 
-#: umap/models.py:122
+#: umap/models.py:121
 msgid "editors only"
 msgstr "iba prispievatelia"
 
-#: umap/models.py:123
-msgid "blocked"
-msgstr ""
-
-#: umap/models.py:126 umap/models.py:256
+#: umap/models.py:124 umap/models.py:252
 msgid "description"
 msgstr "popis"
 
-#: umap/models.py:127
+#: umap/models.py:125
 msgid "center"
 msgstr "stred"
 
-#: umap/models.py:128
+#: umap/models.py:126
 msgid "zoom"
 msgstr "priblíženie"
 
-#: umap/models.py:129
+#: umap/models.py:127
 msgid "locate"
 msgstr "lokalizovať"
 
-#: umap/models.py:129
+#: umap/models.py:127
 msgid "Locate user on load?"
 msgstr "Nájsť polohu používateľa pri štarte?"
 
-#: umap/models.py:132
+#: umap/models.py:130
 msgid "Choose the map licence."
 msgstr "Vyberte si licenciu mapy."
 
-#: umap/models.py:133
+#: umap/models.py:131
 msgid "licence"
 msgstr "licencia"
 
-#: umap/models.py:138
+#: umap/models.py:136
 msgid "owner"
 msgstr "vlastník"
 
-#: umap/models.py:139
+#: umap/models.py:137
 msgid "editors"
 msgstr "prispievatelia"
 
-#: umap/models.py:140
+#: umap/models.py:138
 msgid "edit status"
 msgstr "kto môže vykonávať úpravy"
 
-#: umap/models.py:141
+#: umap/models.py:139
 msgid "share status"
 msgstr "nastavenie zdieľania"
 
-#: umap/models.py:142
+#: umap/models.py:140
 msgid "settings"
 msgstr "nastavenia"
 
-#: umap/models.py:210
+#: umap/models.py:206
 msgid "Clone of"
 msgstr "Kópia"
 
-#: umap/models.py:261
+#: umap/models.py:257
 msgid "display on load"
 msgstr "zobraziť pri štarte"
 
-#: umap/models.py:262
+#: umap/models.py:258
 msgid "Display this layer on load."
 msgstr "Zobraziť túto vrstvu pri štarte."
 
@@ -225,9 +174,9 @@ msgstr "Prosím vyberte poskytovateľa mapy"
 #: umap/templates/umap/about_summary.html:6
 #, python-format
 msgid ""
-"uMap lets you create maps with <a href=\"%(osm_url)s\" />OpenStreetMap</a> "
+"uMap let you create maps with <a href=\"%(osm_url)s\" />OpenStreetMap</a> "
 "layers in a minute and embed them in your site."
-msgstr ""
+msgstr "Vytvárajte a zdieľajte vlastné <a href=\"%(osm_url)s\" />OpenStreet</a> mapy a behom pár minút ich použite na svojom webe."
 
 #: umap/templates/umap/about_summary.html:11
 msgid "Choose the layers of your map"
@@ -262,9 +211,23 @@ msgstr "Zdieľajte a vložte mapu na inú webstránku"
 msgid "And it's <a href=\"%(repo_url)s\">open source</a>!"
 msgstr "A celé je to <a href=\"%(repo_url)s\">open source</a>!"
 
+#: umap/templates/umap/about_summary.html:33
+#: umap/templates/umap/navigation.html:26
+msgid "Create a map"
+msgstr "Vytvoriť mapu"
+
 #: umap/templates/umap/about_summary.html:35
 msgid "Play with the demo"
 msgstr "Hrajte sa s demom"
+
+#: umap/templates/umap/home.html:9
+#, python-format
+msgid ""
+"This is a demo instance, used for tests and pre-rolling releases. If you "
+"need a stable instance, please use <a "
+"href=\"%(stable_url)s\">%(stable_url)s</a>. You can also host your own "
+"instance, it's <a href=\"%(repo_url)s\">open source</a>!"
+msgstr "Toto je ukážková verzia, používaná na testovanie nových vydaní uMap. Ak potrebujete stabilnú verzu, použite <a href=\"%(stable_url)s\">%(stable_url)s</a>. Môžete si tiež stiahnúť celý projekt a nainštalovať ho na svoj server - je to <a href=\"%(repo_url)s\">open source</a>!"
 
 #: umap/templates/umap/home.html:17
 msgid "Map of the uMaps"
@@ -278,13 +241,25 @@ msgstr "Inšpirujte sa prezeraním iných máp"
 msgid "You are logged in. Continuing..."
 msgstr "Ste prihláseni. Pokračujeme ďalej…"
 
-#: umap/templates/umap/map_list.html:7 umap/views.py:214
+#: umap/templates/umap/map_list.html:7 umap/views.py:212
 msgid "by"
 msgstr ", autor:"
 
 #: umap/templates/umap/map_list.html:11
 msgid "More"
 msgstr "Viac"
+
+#: umap/templates/umap/navigation.html:10
+msgid "My maps"
+msgstr "Moje mapy"
+
+#: umap/templates/umap/navigation.html:12
+msgid "Log in"
+msgstr "Prihlásiť sa"
+
+#: umap/templates/umap/navigation.html:12
+msgid "Sign in"
+msgstr "Zaregistrovať sa"
 
 #: umap/templates/umap/navigation.html:14
 msgid "About"
@@ -297,6 +272,10 @@ msgstr "Napíšte nám"
 #: umap/templates/umap/navigation.html:18
 msgid "Change password"
 msgstr "Zmeniť heslo"
+
+#: umap/templates/umap/navigation.html:20
+msgid "Log out"
+msgstr "Odhlásiť sa"
 
 #: umap/templates/umap/password_change.html:6
 msgid "Password change"
@@ -336,44 +315,52 @@ msgstr "Vaše heslo sa zmenilo."
 msgid "Not map found."
 msgstr "Žiadna mapa sa nenašla."
 
-#: umap/views.py:220
+#: umap/templates/umap/search_bar.html:6
+msgid "Search maps"
+msgstr "Hľadať mapy"
+
+#: umap/templates/umap/search_bar.html:9
+msgid "Search"
+msgstr "Hľadať"
+
+#: umap/views.py:218
 msgid "View the map"
 msgstr "Prezrieť si túto mapu"
 
-#: umap/views.py:524
+#: umap/views.py:519
 #, python-format
 msgid ""
 "Your map has been created! If you want to edit this map from another "
 "computer, please use this link: %(anonymous_url)s"
 msgstr "Vaša mapa bola vytvorená! Ak chcete upravovať túto mapu z iného počítača, použite tento odkaz: %(anonymous_url)s"
 
-#: umap/views.py:529
+#: umap/views.py:524
 msgid "Congratulations, your map has been created!"
 msgstr "Gratulujeme, vaša mapa bola vytvorená!"
 
-#: umap/views.py:561
+#: umap/views.py:551
 msgid "Map has been updated!"
 msgstr "Mapa bola aktualizována!"
 
-#: umap/views.py:587
+#: umap/views.py:577
 msgid "Map editors updated with success!"
 msgstr "Zoznam prispievovateľov bol úspešne upravený!"
 
-#: umap/views.py:612
+#: umap/views.py:602
 msgid "Only its owner can delete the map."
 msgstr "Iba vlastník môže vymazať túto mapu."
 
-#: umap/views.py:637
+#: umap/views.py:631
 #, python-format
 msgid ""
 "Your map has been cloned! If you want to edit this map from another "
 "computer, please use this link: %(anonymous_url)s"
 msgstr "Bola vytvorená kópia mapy! Ak chcete upravovať túto mapu z iného počítača, použite tento odkaz: %(anonymous_url)s"
 
-#: umap/views.py:642
+#: umap/views.py:636
 msgid "Congratulations, your map has been cloned!"
 msgstr "Gratulujeme, bola vytvorená kópia mapy!"
 
-#: umap/views.py:809
+#: umap/views.py:803
 msgid "Layer successfully deleted."
 msgstr "Vrstva bola úspešne vymazaná."

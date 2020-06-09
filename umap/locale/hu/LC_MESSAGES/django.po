@@ -3,75 +3,28 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# Gábor Babos <gabor.babos@gmail.com>, 2017-2019
+# Gábor Babos <gabor.babos@gmail.com>, 2017-2018
 # Peter Velosy <peter.velosy@gmail.com>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: uMap\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-07 14:28+0000\n"
-"PO-Revision-Date: 2019-09-10 09:55+0000\n"
-"Last-Translator: Gábor Babos <gabor.babos@gmail.com>\n"
-"Language-Team: Hungarian (http://www.transifex.com/openstreetmap/umap/language/hu/)\n"
+"POT-Creation-Date: 2018-09-08 14:50+0000\n"
+"PO-Revision-Date: 2018-09-08 14:51+0000\n"
+"Last-Translator: yohanboniface <yohanboniface@free.fr>\n"
+"Language-Team: Hungarian (http://www.transifex.com/yohanboniface/umap/language/hu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: hu\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: tmp/framacarte/templates/umap/home.html:8 umap/templates/umap/home.html:9
-#, python-format
-msgid ""
-"This is a demo instance, used for tests and pre-rolling releases. If you "
-"need a stable instance, please use <a "
-"href=\"%(stable_url)s\">%(stable_url)s</a>. You can also host your own "
-"instance, it's <a href=\"%(repo_url)s\">open source</a>!"
-msgstr "Ez egy demonstrációs változat, amelyet tesztelésre és még nem nyilvános kiadásoknál használnak. Ha stabil változatra van szüksége, használja ezt a címet: <a href=\"%(stable_url)s\">%(stable_url)s</a>. A uMap-et a saját szerverére is telepítheti, hiszen <a href=\"%(repo_url)s\">nyílt forráskódú</a>!"
-
-#: tmp/framacarte/templates/umap/home.html:83
-#: tmp/framacarte/templates/umap/navigation.html:14
-#: umap/templates/umap/about_summary.html:33
-#: umap/templates/umap/navigation.html:26
-msgid "Create a map"
-msgstr "Térkép készítése"
-
-#: tmp/framacarte/templates/umap/navigation.html:7
-#: umap/templates/umap/navigation.html:10
-msgid "My maps"
-msgstr "Térképeim"
-
-#: tmp/framacarte/templates/umap/navigation.html:9
-#: umap/templates/umap/navigation.html:12
-msgid "Log in"
-msgstr "Bejelentkezés"
-
-#: tmp/framacarte/templates/umap/navigation.html:9
-#: umap/templates/umap/navigation.html:12
-msgid "Sign in"
-msgstr "Regisztráció"
-
-#: tmp/framacarte/templates/umap/navigation.html:12
-#: umap/templates/umap/navigation.html:20
-msgid "Log out"
-msgstr "Kijelentkezés"
-
-#: tmp/framacarte/templates/umap/search_bar.html:6
-#: umap/templates/umap/search_bar.html:6
-msgid "Search maps"
-msgstr "Térképek keresése"
-
-#: tmp/framacarte/templates/umap/search_bar.html:10
-#: tmp/framacarte/templates/umap/search_bar.html:13
-#: umap/templates/umap/search_bar.html:9
-msgid "Search"
-msgstr "Keresés"
-
 #: umap/forms.py:40
 #, python-format
 msgid "Secret edit link is %s"
 msgstr "Titkos szerkesztési link: %s"
 
-#: umap/forms.py:44 umap/models.py:115
+#: umap/forms.py:44 umap/models.py:114
 msgid "Everyone can edit"
 msgstr "Bárki szerkesztheti"
 
@@ -81,7 +34,7 @@ msgstr "Kizárólag titkos szerkesztési linken szerkeszthető"
 
 #: umap/middleware.py:14
 msgid "Site is readonly for maintenance"
-msgstr "Karbantartás miatt a webhely csak olvasható"
+msgstr ""
 
 #: umap/models.py:17
 msgid "name"
@@ -103,87 +56,83 @@ msgstr "OSM-csempeformátumot használó URL-sablon"
 msgid "Order of the tilelayers in the edit box"
 msgstr "Csemperétegek sorrendje a szerkesztődobozban"
 
-#: umap/models.py:116
+#: umap/models.py:115
 msgid "Only editors can edit"
 msgstr "Csak szerkesztők szerkeszthetik"
 
-#: umap/models.py:117
+#: umap/models.py:116
 msgid "Only owner can edit"
 msgstr "Csak a tulajdonos szerkesztheti"
 
-#: umap/models.py:120
+#: umap/models.py:119
 msgid "everyone (public)"
 msgstr "mindenki (nyilvános)"
 
-#: umap/models.py:121
+#: umap/models.py:120
 msgid "anyone with link"
 msgstr "a link birtokában bárki"
 
-#: umap/models.py:122
+#: umap/models.py:121
 msgid "editors only"
 msgstr "csak szerkesztők"
 
-#: umap/models.py:123
-msgid "blocked"
-msgstr "blokkolva"
-
-#: umap/models.py:126 umap/models.py:256
+#: umap/models.py:124 umap/models.py:252
 msgid "description"
 msgstr "leírás"
 
-#: umap/models.py:127
+#: umap/models.py:125
 msgid "center"
 msgstr "középpont"
 
-#: umap/models.py:128
+#: umap/models.py:126
 msgid "zoom"
 msgstr "nagyítás"
 
-#: umap/models.py:129
+#: umap/models.py:127
 msgid "locate"
 msgstr "helymeghatározás"
 
-#: umap/models.py:129
+#: umap/models.py:127
 msgid "Locate user on load?"
 msgstr "Bekérje a felhasználó pozícióját betöltéskor?"
 
-#: umap/models.py:132
+#: umap/models.py:130
 msgid "Choose the map licence."
 msgstr "Térképlicenc kiválasztása"
 
-#: umap/models.py:133
+#: umap/models.py:131
 msgid "licence"
 msgstr "licenc"
 
-#: umap/models.py:138
+#: umap/models.py:136
 msgid "owner"
 msgstr "tulajdonos"
 
-#: umap/models.py:139
+#: umap/models.py:137
 msgid "editors"
 msgstr "szerkesztők"
 
-#: umap/models.py:140
+#: umap/models.py:138
 msgid "edit status"
 msgstr "szerkeszthetőség"
 
-#: umap/models.py:141
+#: umap/models.py:139
 msgid "share status"
 msgstr "megoszthatóság"
 
-#: umap/models.py:142
+#: umap/models.py:140
 msgid "settings"
 msgstr "beállítások"
 
-#: umap/models.py:210
+#: umap/models.py:206
 msgid "Clone of"
 msgstr "Másolat erről: "
 
-#: umap/models.py:261
+#: umap/models.py:257
 msgid "display on load"
 msgstr "megjelenítés betöltéskor"
 
-#: umap/models.py:262
+#: umap/models.py:258
 msgid "Display this layer on load."
 msgstr "Réteg megjelenítése betöltéskor"
 
@@ -199,7 +148,7 @@ msgstr "%(current_user)s térképeinek böngészése"
 #: umap/templates/auth/user_detail.html:15
 #, python-format
 msgid "%(current_user)s has no maps."
-msgstr "%(current_user)s felhasználónak nincs térképe."
+msgstr ""
 
 #: umap/templates/registration/login.html:4
 msgid "Please log in with your account"
@@ -224,7 +173,7 @@ msgstr "Válasszon egy szolgáltatót"
 #: umap/templates/umap/about_summary.html:6
 #, python-format
 msgid ""
-"uMap lets you create maps with <a href=\"%(osm_url)s\" />OpenStreetMap</a> "
+"uMap let you create maps with <a href=\"%(osm_url)s\" />OpenStreetMap</a> "
 "layers in a minute and embed them in your site."
 msgstr "A uMap segítségével percek alatt létrehozhat <a href=\"%(osm_url)s\" />OpenStreetMap</a>-alapú térképrétegeket, amelyeket be is ágyazhat a weboldalába."
 
@@ -261,9 +210,23 @@ msgstr "Ágyazza be és ossza meg a térképét"
 msgid "And it's <a href=\"%(repo_url)s\">open source</a>!"
 msgstr "És mindezt <a href=\"%(repo_url)s\">nyílt forráskóddal</a>!"
 
+#: umap/templates/umap/about_summary.html:33
+#: umap/templates/umap/navigation.html:26
+msgid "Create a map"
+msgstr "Térkép készítése"
+
 #: umap/templates/umap/about_summary.html:35
 msgid "Play with the demo"
 msgstr "Játék a bemutatóval"
+
+#: umap/templates/umap/home.html:9
+#, python-format
+msgid ""
+"This is a demo instance, used for tests and pre-rolling releases. If you "
+"need a stable instance, please use <a "
+"href=\"%(stable_url)s\">%(stable_url)s</a>. You can also host your own "
+"instance, it's <a href=\"%(repo_url)s\">open source</a>!"
+msgstr "Ez egy demonstrációs változat, amelyet tesztelésre és még nem nyilvános kiadásoknál használnak. Ha stabil változatra van szüksége, használja ezt a címet: <a href=\"%(stable_url)s\">%(stable_url)s</a>. A uMap-et a saját szerverére is telepítheti, hiszen <a href=\"%(repo_url)s\">nyílt forráskódú</a>!"
 
 #: umap/templates/umap/home.html:17
 msgid "Map of the uMaps"
@@ -277,13 +240,25 @@ msgstr "Szerezzen ihletet, böngésszen a térképek között!"
 msgid "You are logged in. Continuing..."
 msgstr "Be van jelentkezve. Továbblépés…"
 
-#: umap/templates/umap/map_list.html:7 umap/views.py:214
+#: umap/templates/umap/map_list.html:7 umap/views.py:212
 msgid "by"
 msgstr "– készítette:"
 
 #: umap/templates/umap/map_list.html:11
 msgid "More"
 msgstr "Még több"
+
+#: umap/templates/umap/navigation.html:10
+msgid "My maps"
+msgstr "Térképeim"
+
+#: umap/templates/umap/navigation.html:12
+msgid "Log in"
+msgstr "Bejelentkezés"
+
+#: umap/templates/umap/navigation.html:12
+msgid "Sign in"
+msgstr "Regisztráció"
 
 #: umap/templates/umap/navigation.html:14
 msgid "About"
@@ -296,6 +271,10 @@ msgstr "Visszajelzés"
 #: umap/templates/umap/navigation.html:18
 msgid "Change password"
 msgstr "Jelszó módosítása"
+
+#: umap/templates/umap/navigation.html:20
+msgid "Log out"
+msgstr "Kijelentkezés"
 
 #: umap/templates/umap/password_change.html:6
 msgid "Password change"
@@ -335,44 +314,52 @@ msgstr "A jelszava megváltozott."
 msgid "Not map found."
 msgstr "Ilyen térkép nem található."
 
-#: umap/views.py:220
+#: umap/templates/umap/search_bar.html:6
+msgid "Search maps"
+msgstr "Térképek keresése"
+
+#: umap/templates/umap/search_bar.html:9
+msgid "Search"
+msgstr "Keresés"
+
+#: umap/views.py:218
 msgid "View the map"
 msgstr "Térkép megtekintése"
 
-#: umap/views.py:524
+#: umap/views.py:519
 #, python-format
 msgid ""
 "Your map has been created! If you want to edit this map from another "
 "computer, please use this link: %(anonymous_url)s"
 msgstr "A térképe elkészült! Ha egy másik számítógépről szeretné szerkeszteni, ezt a linket használja: %(anonymous_url)s"
 
-#: umap/views.py:529
+#: umap/views.py:524
 msgid "Congratulations, your map has been created!"
 msgstr "Gratulálunk, a térképe elkészült!"
 
-#: umap/views.py:561
+#: umap/views.py:551
 msgid "Map has been updated!"
 msgstr "A térkép frissült."
 
-#: umap/views.py:587
+#: umap/views.py:577
 msgid "Map editors updated with success!"
 msgstr "A térképszerkesztők sikeresen frissültek."
 
-#: umap/views.py:612
+#: umap/views.py:602
 msgid "Only its owner can delete the map."
 msgstr "A térképet csak a tulajdonosa törölheti."
 
-#: umap/views.py:637
+#: umap/views.py:631
 #, python-format
 msgid ""
 "Your map has been cloned! If you want to edit this map from another "
 "computer, please use this link: %(anonymous_url)s"
 msgstr "Elkészült a térképe másolata. Ha egy másik számítógépről szeretné szerkeszteni, ezt a linket használja: %(anonymous_url)s"
 
-#: umap/views.py:642
+#: umap/views.py:636
 msgid "Congratulations, your map has been cloned!"
 msgstr "Gratulálunk, elkészült a térképe másolata!"
 
-#: umap/views.py:809
+#: umap/views.py:803
 msgid "Layer successfully deleted."
 msgstr "A réteg sikeresen törlődött."

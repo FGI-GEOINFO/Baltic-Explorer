@@ -9,69 +9,22 @@ msgid ""
 msgstr ""
 "Project-Id-Version: uMap\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-07 14:28+0000\n"
-"PO-Revision-Date: 2019-04-07 14:28+0000\n"
+"POT-Creation-Date: 2018-09-08 14:50+0000\n"
+"PO-Revision-Date: 2018-09-08 14:51+0000\n"
 "Last-Translator: yohanboniface <yohanboniface@free.fr>\n"
-"Language-Team: Lithuanian (http://www.transifex.com/openstreetmap/umap/language/lt/)\n"
+"Language-Team: Lithuanian (http://www.transifex.com/yohanboniface/umap/language/lt/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: lt\n"
 "Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);\n"
 
-#: tmp/framacarte/templates/umap/home.html:8 umap/templates/umap/home.html:9
-#, python-format
-msgid ""
-"This is a demo instance, used for tests and pre-rolling releases. If you "
-"need a stable instance, please use <a "
-"href=\"%(stable_url)s\">%(stable_url)s</a>. You can also host your own "
-"instance, it's <a href=\"%(repo_url)s\">open source</a>!"
-msgstr "Tai demonstracinė versija, naudojama testavimui ir naujų versijų demonstravimui. Jei Jums reikia stabilios versijos, tada geriau naudokitės <a href=\"%(stable_url)s\">%(stable_url)s</a>. Jūs taip pat gali pasileisti savo puslapį, juk tai <a href=\"%(repo_url)s\">atviras kodas</a>!"
-
-#: tmp/framacarte/templates/umap/home.html:83
-#: tmp/framacarte/templates/umap/navigation.html:14
-#: umap/templates/umap/about_summary.html:33
-#: umap/templates/umap/navigation.html:26
-msgid "Create a map"
-msgstr "Kurti žemėlapį"
-
-#: tmp/framacarte/templates/umap/navigation.html:7
-#: umap/templates/umap/navigation.html:10
-msgid "My maps"
-msgstr "Mano žemėlapiai"
-
-#: tmp/framacarte/templates/umap/navigation.html:9
-#: umap/templates/umap/navigation.html:12
-msgid "Log in"
-msgstr "Prisijungti"
-
-#: tmp/framacarte/templates/umap/navigation.html:9
-#: umap/templates/umap/navigation.html:12
-msgid "Sign in"
-msgstr "Užsiregistruoti"
-
-#: tmp/framacarte/templates/umap/navigation.html:12
-#: umap/templates/umap/navigation.html:20
-msgid "Log out"
-msgstr "Atsijungti"
-
-#: tmp/framacarte/templates/umap/search_bar.html:6
-#: umap/templates/umap/search_bar.html:6
-msgid "Search maps"
-msgstr "Ieškoti žemėlapių"
-
-#: tmp/framacarte/templates/umap/search_bar.html:10
-#: tmp/framacarte/templates/umap/search_bar.html:13
-#: umap/templates/umap/search_bar.html:9
-msgid "Search"
-msgstr "Ieškoti"
-
 #: umap/forms.py:40
 #, python-format
 msgid "Secret edit link is %s"
 msgstr "Slapta redagavimo nuoroda %s"
 
-#: umap/forms.py:44 umap/models.py:115
+#: umap/forms.py:44 umap/models.py:114
 msgid "Everyone can edit"
 msgstr "Visi gali redaguoti"
 
@@ -103,87 +56,83 @@ msgstr "URL šablonas OSM kaladėlių formatui"
 msgid "Order of the tilelayers in the edit box"
 msgstr "Žemėlapio sluoksnių tvarka redagavimo lange"
 
-#: umap/models.py:116
+#: umap/models.py:115
 msgid "Only editors can edit"
 msgstr "Tik redaktoriai gali keisti"
 
-#: umap/models.py:117
+#: umap/models.py:116
 msgid "Only owner can edit"
 msgstr "Tik savininkas gali keisti"
 
-#: umap/models.py:120
+#: umap/models.py:119
 msgid "everyone (public)"
 msgstr "visi (viešai)"
 
-#: umap/models.py:121
+#: umap/models.py:120
 msgid "anyone with link"
 msgstr "visi su nuoroda"
 
-#: umap/models.py:122
+#: umap/models.py:121
 msgid "editors only"
 msgstr "tik keitėjai"
 
-#: umap/models.py:123
-msgid "blocked"
-msgstr ""
-
-#: umap/models.py:126 umap/models.py:256
+#: umap/models.py:124 umap/models.py:252
 msgid "description"
 msgstr "aprašymas"
 
-#: umap/models.py:127
+#: umap/models.py:125
 msgid "center"
 msgstr "centras"
 
-#: umap/models.py:128
+#: umap/models.py:126
 msgid "zoom"
 msgstr "mastelis"
 
-#: umap/models.py:129
+#: umap/models.py:127
 msgid "locate"
 msgstr "nustatyti padėtį"
 
-#: umap/models.py:129
+#: umap/models.py:127
 msgid "Locate user on load?"
 msgstr "Nustatyti padėti užsikrovus?"
 
-#: umap/models.py:132
+#: umap/models.py:130
 msgid "Choose the map licence."
 msgstr "Pasirinkite žemėlapio licenziją."
 
-#: umap/models.py:133
+#: umap/models.py:131
 msgid "licence"
 msgstr "licenzija"
 
-#: umap/models.py:138
+#: umap/models.py:136
 msgid "owner"
 msgstr "savininkas"
 
-#: umap/models.py:139
+#: umap/models.py:137
 msgid "editors"
 msgstr "redaktoriai"
 
-#: umap/models.py:140
+#: umap/models.py:138
 msgid "edit status"
 msgstr "keisti būseną"
 
-#: umap/models.py:141
+#: umap/models.py:139
 msgid "share status"
 msgstr "pasidalinti būsena"
 
-#: umap/models.py:142
+#: umap/models.py:140
 msgid "settings"
 msgstr "nustatymai"
 
-#: umap/models.py:210
+#: umap/models.py:206
 msgid "Clone of"
 msgstr "Kopija"
 
-#: umap/models.py:261
+#: umap/models.py:257
 msgid "display on load"
 msgstr "rodyti pasikrovus"
 
-#: umap/models.py:262
+#: umap/models.py:258
 msgid "Display this layer on load."
 msgstr "Rodyti šį sluoksnį pasrikrovus."
 
@@ -224,9 +173,9 @@ msgstr "Pasirinkite teikėją"
 #: umap/templates/umap/about_summary.html:6
 #, python-format
 msgid ""
-"uMap lets you create maps with <a href=\"%(osm_url)s\" />OpenStreetMap</a> "
+"uMap let you create maps with <a href=\"%(osm_url)s\" />OpenStreetMap</a> "
 "layers in a minute and embed them in your site."
-msgstr ""
+msgstr "uMap leidžia susikurti savo žemėlapį naudojant <a href=\"%(osm_url)s\" />OpenStreetMap</a> sluoksnius vos per minutę ir įterpti jį į savo puslapį."
 
 #: umap/templates/umap/about_summary.html:11
 msgid "Choose the layers of your map"
@@ -261,9 +210,23 @@ msgstr "Įterpti ir dalintis savo žemėlapiu"
 msgid "And it's <a href=\"%(repo_url)s\">open source</a>!"
 msgstr "Juk tai <a href=\"%(repo_url)s\">atviras kodas</a>!"
 
+#: umap/templates/umap/about_summary.html:33
+#: umap/templates/umap/navigation.html:26
+msgid "Create a map"
+msgstr "Kurti žemėlapį"
+
 #: umap/templates/umap/about_summary.html:35
 msgid "Play with the demo"
 msgstr "Išbandyti demo"
+
+#: umap/templates/umap/home.html:9
+#, python-format
+msgid ""
+"This is a demo instance, used for tests and pre-rolling releases. If you "
+"need a stable instance, please use <a "
+"href=\"%(stable_url)s\">%(stable_url)s</a>. You can also host your own "
+"instance, it's <a href=\"%(repo_url)s\">open source</a>!"
+msgstr "Tai demonstracinė versija, naudojama testavimui ir naujų versijų demonstravimui. Jei Jums reikia stabilios versijos, tada geriau naudokitės <a href=\"%(stable_url)s\">%(stable_url)s</a>. Jūs taip pat gali pasileisti savo puslapį, juk tai <a href=\"%(repo_url)s\">atviras kodas</a>!"
 
 #: umap/templates/umap/home.html:17
 msgid "Map of the uMaps"
@@ -277,13 +240,25 @@ msgstr "Peržiūrėkite žemėlapius, raskite įkvėpimą"
 msgid "You are logged in. Continuing..."
 msgstr "Sėkmingai prisijungėte. Kraunasi..."
 
-#: umap/templates/umap/map_list.html:7 umap/views.py:214
+#: umap/templates/umap/map_list.html:7 umap/views.py:212
 msgid "by"
 msgstr "pagal"
 
 #: umap/templates/umap/map_list.html:11
 msgid "More"
 msgstr "Daugiau"
+
+#: umap/templates/umap/navigation.html:10
+msgid "My maps"
+msgstr "Mano žemėlapiai"
+
+#: umap/templates/umap/navigation.html:12
+msgid "Log in"
+msgstr "Prisijungti"
+
+#: umap/templates/umap/navigation.html:12
+msgid "Sign in"
+msgstr "Užsiregistruoti"
 
 #: umap/templates/umap/navigation.html:14
 msgid "About"
@@ -296,6 +271,10 @@ msgstr "Atsiliepimai"
 #: umap/templates/umap/navigation.html:18
 msgid "Change password"
 msgstr "Keisti slaptažodį"
+
+#: umap/templates/umap/navigation.html:20
+msgid "Log out"
+msgstr "Atsijungti"
 
 #: umap/templates/umap/password_change.html:6
 msgid "Password change"
@@ -335,44 +314,52 @@ msgstr "Jūsų slaptažodis buvo pakeistas."
 msgid "Not map found."
 msgstr "Nerasta."
 
-#: umap/views.py:220
+#: umap/templates/umap/search_bar.html:6
+msgid "Search maps"
+msgstr "Ieškoti žemėlapių"
+
+#: umap/templates/umap/search_bar.html:9
+msgid "Search"
+msgstr "Ieškoti"
+
+#: umap/views.py:218
 msgid "View the map"
 msgstr "Peržiūrėti žemėlapį"
 
-#: umap/views.py:524
+#: umap/views.py:519
 #, python-format
 msgid ""
 "Your map has been created! If you want to edit this map from another "
 "computer, please use this link: %(anonymous_url)s"
 msgstr "Jūsų žemėlapis sėkmingai sukurtas! Jei norite redaguoti jį iš kito kompiuterio, pasinaudokite šia nuoroda: %(anonymous_url)s"
 
-#: umap/views.py:529
+#: umap/views.py:524
 msgid "Congratulations, your map has been created!"
 msgstr "Sveikinam, Jūsų žemėlapis sukurtas!"
 
-#: umap/views.py:561
+#: umap/views.py:551
 msgid "Map has been updated!"
 msgstr "Žemėlapis atnaujintas!"
 
-#: umap/views.py:587
+#: umap/views.py:577
 msgid "Map editors updated with success!"
 msgstr "Žemėlapio keitėjai atnaujinti!"
 
-#: umap/views.py:612
+#: umap/views.py:602
 msgid "Only its owner can delete the map."
 msgstr "Tik savininkas gali ištrinti žemėlapį."
 
-#: umap/views.py:637
+#: umap/views.py:631
 #, python-format
 msgid ""
 "Your map has been cloned! If you want to edit this map from another "
 "computer, please use this link: %(anonymous_url)s"
 msgstr "Jūsų žemėlapis nukopijuotas! Jei norite redaguoti jį iš kito kompiuterio, pasinaudokite šia nuoroda: %(anonymous_url)s"
 
-#: umap/views.py:642
+#: umap/views.py:636
 msgid "Congratulations, your map has been cloned!"
 msgstr "Sveikinam, Jūsų žemėlapis buvo nukopijuotas!"
 
-#: umap/views.py:809
+#: umap/views.py:803
 msgid "Layer successfully deleted."
 msgstr "Sluoksnis sėkmingai ištrintas."

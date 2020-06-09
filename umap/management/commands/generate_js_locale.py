@@ -1,7 +1,10 @@
+import io
+import os
 from pathlib import Path
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.contrib.staticfiles import finders
 from django.template.loader import render_to_string
 from django.utils.translation import to_locale
 
@@ -18,7 +21,7 @@ class Command(BaseCommand):
                 print("Processing", name)
             path = ROOT / '{code}.json'.format(code=code)
             if not path.exists():
-                print(path, 'does not exist.', 'Skipping')
+                print(path, 'doest not exist', 'Skipping')
             else:
                 with path.open(encoding="utf-8") as f:
                     if self.verbosity > 1:

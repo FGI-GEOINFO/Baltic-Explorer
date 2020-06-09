@@ -6,7 +6,7 @@ from django.template.defaultfilters import slugify
 from django.conf import settings
 from django.forms.utils import ErrorList
 from django.forms.widgets import NumberInput, CheckboxInput
-from .models import Map, DataLayer
+from .models import Map, DataLayer, LatviaCS
 
 DEFAULT_LATITUDE = settings.LEAFLET_LATITUDE if hasattr(settings, "LEAFLET_LATITUDE") else 51
 DEFAULT_LONGITUDE = settings.LEAFLET_LONGITUDE if hasattr(settings, "LEAFLET_LONGITUDE") else 2
@@ -89,3 +89,36 @@ class MapSettingsForm(forms.ModelForm):
 
 class RangeInput(NumberInput):
     input_type = 'range'
+
+class LatvianCaseForm(forms.ModelForm):
+
+    class Meta:
+        model = LatviaCS
+        fields = ['sustCheck','sust','mytrCheck','mytr','fuveCheck','fuve','fuluCheck','fulu','annalCheck','annal','method']
+        labels = {
+
+            "sust": "",
+            "sustCheck": "Sum stones",
+            "mytr": "",
+            "mytrCheck": "Mytilus trossulus",
+            "fuve": "",
+            "fuveCheck": "Fucus vesiculosus",
+            "fulu": "",
+            "fuluCheck": "Furcellaria lumbricalis",
+            "annal": "",
+            "annalCheck": "Annual algae",
+            "method": "Calculation method"
+        }
+        widgets = {
+            "sustCheck":CheckboxInput(attrs={'class': 'latvian-check-field', 'id':'sust_check_field', 'style': 'float: left'}), 
+            "sust":RangeInput(attrs={'max': 100, 'min':0, 'step':10, 'class': 'latvian-form-field', 'id':'sust_field', 'style': 'width:100%;'}), 
+            "mytrCheck":CheckboxInput(attrs={'class': 'latvian-check-field', 'id':'sust_check_field', 'style': 'float: left'}), 
+            "mytr":RangeInput(attrs={'max': 100, 'min':0, 'step':10, 'class': 'latvian-form-field', 'id':'mytr_field', 'style': 'width:100%;'}),
+            "fuveCheck":CheckboxInput(attrs={'class': 'latvian-check-field', 'id':'sust_check_field', 'style': 'float: left'}), 
+            "fuve":RangeInput(attrs={'max': 100, 'min':0, 'step':10, 'class': 'latvian-form-field', 'id':'fuve_field', 'style': 'width:100%;'}),
+            "fuluCheck":CheckboxInput(attrs={'class': 'latvian-check-field', 'id':'sust_check_field', 'style': 'float: left'}), 
+            "fulu":RangeInput(attrs={'max': 100, 'min':0, 'step':10, 'class': 'latvian-form-field', 'id':'fulu_field', 'style': 'width:100%;'}),
+            "annalCheck":CheckboxInput(attrs={'class': 'latvian-check-field', 'id':'sust_check_field', 'style': 'float: left'}), 
+            "annal":RangeInput(attrs={'max': 100, 'min':0, 'step':10, 'class': 'latvian-form-field', 'id':'annal_field', 'style': 'width:100%;'}),
+            "method":forms.Select(choices=LatviaCS.METHOD, attrs={'class': 'latvian-form-selector'})
+        }

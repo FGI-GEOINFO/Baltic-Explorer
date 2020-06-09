@@ -1,3 +1,4 @@
+
 import hashlib
 import json
 import os
@@ -9,6 +10,12 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout as do_logout
 from django.contrib.auth import get_user_model
+
+# Register
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import render, redirect
+
 from django.contrib.gis.measure import D
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.core.signing import BadSignature, Signer
@@ -18,7 +25,7 @@ from django.http import (HttpResponse, HttpResponseBadRequest,
                          HttpResponseForbidden, HttpResponsePermanentRedirect,
                          HttpResponseRedirect)
 from django.middleware.gzip import re_accepts_gzip
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.utils.encoding import force_bytes, smart_bytes
@@ -31,21 +38,26 @@ from django.views.generic.detail import BaseDetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
+from osgeo import gdal
+import numpy as np
+import glob, rasterio 
+from time import time
+
 from .forms import (DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_CENTER,
                     AnonymousMapPermissionsForm, DataLayerForm, FlatErrorList,
                     MapSettingsForm, UpdateMapPermissionsForm)
-from .models import DataLayer, Licence, Map, Pictogram, TileLayer
+from .models import DataLayer, Licence, Map, Pictogram, TileLayer, TileLayerWMS, WMSCategory, WMSProvider
 from .utils import get_uri_template, gzip_file
 
 try:
-    # python3
-    from urllib.parse import urlparse
-    from urllib.request import Request, build_opener
-    from urllib.error import HTTPError
+    import urllib
+#    from urllib.parse import urlparse
+#    from urllib.request import Request, build_opener
+#    from urllib.error import HTTPError
+
 except ImportError:
     from urlparse import urlparse
     from urllib2 import Request, HTTPError, build_opener
-
 
 User = get_user_model()
 
@@ -76,7 +88,7 @@ class PaginatorMixin(object):
         return qs
 
 
-class Home(TemplateView, PaginatorMixin):
+class Home(TemplateView, PaginatorMixin): # HOME PAGE
     template_name = "umap/home.html"
     list_template_name = "umap/map_list.html"
 
@@ -142,13 +154,11 @@ class UserMaps(DetailView, PaginatorMixin):
         owner = self.request.user == self.object
         manager = Map.objects if owner else Map.public
         maps = manager.filter(Q(owner=self.object) | Q(editors=self.object))
+        maps = maps.distinct().order_by('-modified_at')[:50]
         if owner:
             per_page = settings.UMAP_MAPS_PER_PAGE_OWNER
-            limit = 100
         else:
             per_page = settings.UMAP_MAPS_PER_PAGE
-            limit = 50
-        maps = maps.distinct().order_by('-modified_at')[:limit]
         maps = self.paginate(maps, per_page)
         kwargs.update({
             "maps": maps
@@ -166,6 +176,34 @@ class UserMaps(DetailView, PaginatorMixin):
 
 user_maps = UserMaps.as_view()
 
+class PublicMaps(TemplateView, PaginatorMixin):
+    template_name = "umap/public_maps.html"
+    list_template_name = "umap/map_list.html"
+
+    def get_context_data(self, **kwargs):
+        qs = Map.public
+        if (settings.UMAP_EXCLUDE_DEFAULT_MAPS and
+            'spatialite' not in settings.DATABASES['default']['ENGINE']):
+                # Unsupported query type for sqlite.
+            qs = qs.filter(center__distance_gt=(DEFAULT_CENTER, D(km=1)))
+ 
+        maps = qs.order_by('-modified_at')[:50]
+        maps = self.paginate(maps, settings.UMAP_MAPS_PER_PAGE)
+
+        return {
+            "maps": maps
+        }
+
+    def get_template_names(self):
+        """
+        Dispatch template according to the kind of request: ajax or normal.
+        """
+        if self.request.is_ajax():
+            return [self.list_template_name]
+        else:
+            return super(PublicMaps, self).get_template_names()
+ 
+public_maps = PublicMaps.as_view()
 
 class Search(TemplateView, PaginatorMixin):
     template_name = "umap/search.html"
@@ -266,7 +304,6 @@ def validate_url(request):
 class AjaxProxy(View):
 
     def get(self, *args, **kwargs):
-        # You should not use this in production (use Nginx or so)
         try:
             url = validate_url(self.request)
         except AssertionError:
@@ -296,6 +333,7 @@ class AjaxProxy(View):
             else:
                 response['X-Accel-Expires'] = ttl
             return response
+
 ajax_proxy = AjaxProxy.as_view()
 
 
@@ -340,6 +378,10 @@ def simple_json_response(**kwargs):
 #      Map       #
 # ############## #
 
+# ############## #
+#   Map Mixins   #
+# ############## #
+
 
 class FormLessEditMixin:
     http_method_names = [u'post', ]
@@ -361,15 +403,22 @@ class MapDetailMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         properties = {
+            'epsg': settings.EPSG,
+            'proj': settings.PROJ,
+            'resolutions': settings.RESOLUTIONS,
+            'origin': settings.ORIGIN,
             'urls': _urls_for_js(),
             'tilelayers': TileLayer.get_list(),
+            'tilelayerswms': TileLayerWMS.get_list(),
+            'wmscategories': WMSCategory.get_list(),
+            'wmsproviders': WMSProvider.get_list(),
             'allowEdit': self.is_edit_allowed(),
             'default_iconUrl': "%sumap/img/marker.png" % settings.STATIC_URL,  # noqa
             'umap_id': self.get_umap_id(),
             'licences': dict((l.name, l.json) for l in Licence.objects.all()),
             'edit_statuses': [(i, str(label)) for i, label in Map.EDIT_STATUS],
             'share_statuses': [(i, str(label))
-                               for i, label in Map.SHARE_STATUS if i != Map.BLOCKED],
+                               for i, label in Map.SHARE_STATUS],
             'anonymous_edit_statuses': [(i, str(label)) for i, label
                                         in AnonymousMapPermissionsForm.STATUS],
         }
@@ -452,6 +501,9 @@ class PermissionsMixin:
         anonymous_url = self.object.get_anonymous_edit_url()
         return settings.SITE_URL + anonymous_url
 
+# ############## #
+#   Map Views    #
+# ############## #
 
 class MapView(MapDetailMixin, PermissionsMixin, DetailView):
 
@@ -495,7 +547,6 @@ class MapView(MapDetailMixin, PermissionsMixin, DetailView):
         map_settings['properties']['permissions'] = self.get_permissions()
         return map_settings
 
-
 class MapViewGeoJSON(MapView):
 
     def get_canonical_url(self):
@@ -521,12 +572,12 @@ class MapCreate(FormLessEditMixin, PermissionsMixin, CreateView):
         anonymous_url = self.get_anonymous_edit_url()
         if not self.request.user.is_authenticated:
             msg = _(
-                "Your map has been created! If you want to edit this map from "
+                "Your workspace has been created! If you want to edit this workspace from "
                 "another computer, please use this link: %(anonymous_url)s"
                 % {"anonymous_url": anonymous_url}
             )
         else:
-            msg = _("Congratulations, your map has been created!")
+            msg = _("Congratulations, your workspace has been created!")
         permissions = self.get_permissions()
         # User does not have the cookie yet.
         permissions['anonymous_edit_url'] = anonymous_url
@@ -558,7 +609,7 @@ class MapUpdate(FormLessEditMixin, PermissionsMixin, UpdateView):
             id=self.object.pk,
             url=self.object.get_absolute_url(),
             permissions=self.get_permissions(),
-            info=_("Map has been updated!"),
+            info=_("Workspace has been updated!"),
         )
 
 
@@ -584,7 +635,7 @@ class UpdateMapPermissions(FormLessEditMixin, UpdateView):
     def form_valid(self, form):
         self.object = form.save()
         return simple_json_response(
-            info=_("Map editors updated with success!"))
+            info=_("Workspace editors updated with success!"))
 
 
 class AttachAnonymousMap(View):
@@ -609,7 +660,7 @@ class MapDelete(DeleteView):
         self.object = self.get_object()
         if self.object.owner and self.request.user != self.object.owner:
             return HttpResponseForbidden(
-                _('Only its owner can delete the map.'))
+                _('Only its owner can delete the workspace.'))
         if not self.object.owner\
            and not self.object.is_anonymous_owner(self.request):
             return HttpResponseForbidden()
@@ -634,12 +685,12 @@ class MapClone(PermissionsMixin, View):
                 max_age=ANONYMOUS_COOKIE_MAX_AGE
             )
             msg = _(
-                "Your map has been cloned! If you want to edit this map from "
+                "Your workspace has been cloned! If you want to edit this workspace from "
                 "another computer, please use this link: %(anonymous_url)s"
                 % {"anonymous_url": self.get_anonymous_edit_url()}
             )
         else:
-            msg = _("Congratulations, your map has been cloned!")
+            msg = _("Congratulations, your workspace has been cloned!")
         messages.info(self.request, msg)
         return response
 
@@ -843,3 +894,49 @@ class LoginPopupEnd(TemplateView):
     Basically close the popup.
     """
     template_name = "umap/login_popup_end.html"
+
+
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+
+            ''' Begin reCAPTCHA validation '''
+            recaptcha_response = request.POST.get('g-recaptcha-response')
+            url = 'https://www.google.com/recaptcha/api/siteverify'
+            values = {
+                'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,
+                'response': recaptcha_response
+            }
+
+            data = urllib.parse.urlencode(values).encode()
+            req = urllib.request.Request(url, data=data)
+            response = urllib.request.urlopen(req)
+            result = json.loads(response.read().decode())
+
+            # data = urllib.parse.urlencode(values)
+            # req = urllib2.Request(url, data)
+            # response = urllib2.urlopen(req)
+            # result = json.load(response)
+
+            ''' End reCAPTCHA validation '''
+
+            if result['success']:
+                messages.success(request, 'Welcome to Baltic Explorer!')
+                form.save()
+                username = form.cleaned_data.get('username')
+                raw_password = form.cleaned_data.get('password1')
+                user = authenticate(username=username, password=raw_password)
+                login(request, user)
+                return redirect('home')
+            else:
+                messages.error(request, 'No robots allowed. Please try again.')
+    else:
+        form = UserCreationForm()
+    return render(request, 'signup.html', {'form': form})
+
+
+# User Guide
+
+def userguide(request):
+    return render(request, 'umap/BalticExplorerUserGuide.pdf')

@@ -14,6 +14,9 @@ from .decorators import (jsonize_view, login_required_if_not_anonymous_allowed,
                          map_permissions_check)
 from .utils import decorated_patterns
 
+from django.urls import path
+
+
 admin.autodiscover()
 
 urlpatterns = [
@@ -31,6 +34,8 @@ urlpatterns = [
         name='password_change_done'),
     url(r'^i18n/', include('django.conf.urls.i18n')),
     url(r'^agnocomplete/', include('agnocomplete.urls')),
+    url(r'^signup/$', views.signup, name='signup'), # Register
+    url(r'^userguide/$', views.userguide, name='userguide'), # User Guire
 ]
 
 i18n_urls = [
@@ -77,17 +82,18 @@ i18n_urls += decorated_patterns(
     url(r'^map/(?P<map_id>[\d]+)/datalayer/delete/(?P<pk>\d+)/$',
         views.DataLayerDelete.as_view(), name='datalayer_delete'),
 )
-urlpatterns += i18n_patterns(
+urlpatterns += i18n_patterns( 
     url(r'^$', views.home, name="home"),
-    url(r'^showcase/$', cache_page(24 * 60 * 60)(views.showcase),
-        name='maps_showcase'),
+    url(r'^showcase/$', cache_page(24 * 60 * 60)(views.showcase), 
+        name='maps_showcase'), 
+    url(r'^public/$', views.public_maps, name="public_maps"),
     url(r'^search/$', views.search, name="search"),
     url(r'^about/$', views.about, name="about"),
-    url(r'^user/(?P<username>.+)/$', views.user_maps, name='user_maps'),
+    url(r'^user/(?P<username>[-_\w@]+)/$', views.user_maps, name='user_maps'), 
     url(r'', include(i18n_urls)),
 )
 
-if settings.DEBUG and settings.MEDIA_ROOT:
-    urlpatterns += static(settings.MEDIA_URL,
-                          document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.MEDIA_URL,
+                    document_root=settings.MEDIA_ROOT)
+
 urlpatterns += staticfiles_urlpatterns()

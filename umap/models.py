@@ -8,8 +8,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.signing import Signer
 from django.template.defaultfilters import slugify
 from django.core.files.base import File
-from django.contrib.postgres.fields import JSONField
-
+from django.core.validators import MaxValueValidator, MinValueValidator
+from .fields import DictField
 from .managers import PublicManager
 
 
@@ -98,11 +98,159 @@ class TileLayer(NamedModel):
 
     class Meta:
         ordering = ('rank', 'name', )
+        verbose_name = 'Background map'
+        verbose_name_plural = 'Background maps'
+
+class WMSProvider(NamedModel):
+    name = models.CharField(
+        max_length=200,
+        help_text=_("Provider full name"),
+        default="Other",
+        unique=True,
+    )
+    abreviation = models.CharField(
+        max_length=5,
+        help_text=_("Short name"),
+        default="OT",
+        unique=True,
+    )
+    rank = models.SmallIntegerField(
+        blank=True,
+        null=True,
+        help_text=_('Order of the providers in the edit box')
+    )
+
+    @property
+    def json(self):
+        return dict((field.name, getattr(self, field.name))
+                    for field in self._meta.fields)
+
+    @classmethod
+    def get_list(cls):
+        default = cls.get_default()
+        l = []
+        for t in cls.objects.all():
+            fields = t.json
+            if default and default.pk == t.pk:
+                fields['selected'] = True
+            l.append(fields)
+        return l
+
+    @classmethod
+    def get_default(cls):
+        return cls.objects.order_by('rank')[0]  
+    class Meta:
+        ordering = ('name', 'abreviation')
+        verbose_name = 'WMS provider'
+        verbose_name_plural = 'WMS providers'
+
+class WMSCategory(NamedModel):
+    name = models.CharField(
+        max_length=200,
+        help_text=_("Category full name"),
+        default="Other",
+        unique=True,
+    )
+    abreviation = models.CharField(
+        max_length=5,
+        help_text=_("Short name"),
+        default="OT",
+        unique=True,
+    )
+
+    rank = models.SmallIntegerField(
+        blank=True,
+        null=True,
+        help_text=_('Order of the categories in the edit box')
+    )
+    wms_provider = models.CharField(max_length=300, default="unknown", blank=True)
+
+    @property
+    def json(self):
+        return dict((field.name, getattr(self, field.name))
+                    for field in self._meta.fields)
+
+    @classmethod
+    def get_list(cls):
+        default = cls.get_default()
+        l = []
+        for t in cls.objects.all():
+            fields = t.json
+            if default and default.pk == t.pk:
+                fields['selected'] = True
+            l.append(fields)
+        return l
+
+    @classmethod
+    def get_default(cls):
+        """
+        Returns the default tile layer (used for a map when no layer is set).
+        """
+        return cls.objects.order_by('rank')[0]  # FIXME, make it administrable
+
+    class Meta:
+        ordering = ('name', 'abreviation')
+        verbose_name = 'WMS category'
+        verbose_name_plural = 'WMS categories'
+
+class TileLayerWMS(NamedModel):
+    url_template = models.CharField(
+        max_length=200,
+        help_text=_("WMS url"),
+        default="http://",
+    )
+    url_legend = models.CharField(
+        max_length=300,
+        help_text=_("WMS legnd url"),
+        default="http://",
+    )
+    layers = models.CharField(max_length=300, default="dummy")
+    transparent = models.BooleanField(default=True, blank=True)
+    format = models.CharField(max_length=50, default="image/png")
+    minZoom = models.IntegerField(default=0)
+    maxZoom = models.IntegerField(default=18)
+    attribution = models.CharField(max_length=300, default="unknown", blank=True)
+    wms_category = models.CharField(max_length=300, default="unknown", blank=True)
+    wms_provider = models.CharField(max_length=300, default="unknown", blank=True)
+
+    rank = models.SmallIntegerField(
+        blank=True,
+        null=True,
+        help_text=_('Order of the tilelayers in the edit box'),
+    )
+
+    @property
+    def json(self):
+        return dict((field.name, getattr(self, field.name))
+                    for field in self._meta.fields)
+
+    @classmethod
+    def get_default(cls):
+        """
+        Returns the default tile layer (used for a map when no layer is set).
+        """
+        return cls.objects.order_by('rank')[0]  # FIXME, make it administrable
+
+    @classmethod
+    def get_list(cls):
+        default = cls.get_default()
+        l = []
+        for t in cls.objects.all():
+            fields = t.json
+            if default and default.pk == t.pk:
+                fields['selected'] = True
+            l.append(fields)
+        return l
+
+    class Meta:
+        ordering = ('rank', 'name', )
+        verbose_name = 'WMS layer'
+        verbose_name_plural = 'WMS layers'
 
 
 class Map(NamedModel):
     """
-    A single thematical map.
+    Workspace
     """
     ANONYMOUS = 1
     EDITORS = 2
@@ -110,22 +258,26 @@ class Map(NamedModel):
     PUBLIC = 1
     OPEN = 2
     PRIVATE = 3
-    BLOCKED = 9
     EDIT_STATUS = (
         (ANONYMOUS, _('Everyone can edit')),
         (EDITORS, _('Only editors can edit')),
         (OWNER, _('Only owner can edit')),
     )
     SHARE_STATUS = (
-        (PUBLIC, _('everyone (public)')),
-        (OPEN, _('anyone with link')),
-        (PRIVATE, _('editors only')),
-        (BLOCKED, _('blocked')),
+        (PUBLIC, _('Public: everyone')),
+        (OPEN, _('Hidden: anyone with link')),
+        (PRIVATE, _('Private: editors only')),
     )
     slug = models.SlugField(db_index=True)
     description = models.TextField(blank=True, null=True, verbose_name=_("description"))
     center = models.PointField(geography=True, verbose_name=_("center"))
     zoom = models.IntegerField(default=7, verbose_name=_("zoom"))
+    epsg = models.TextField(default=settings.EPSG, blank=True, null=True, verbose_name=_("EPSG code"))
+    proj = models.TextField(default=settings.PROJ, blank=True, null=True, verbose_name=_("Proj"))
+    resolutions = models.TextField(default=settings.RESOLUTIONS, blank=True, null=True, verbose_name=_("Proj"))
+    origin = models.TextField(default=settings.ORIGIN, blank=True, null=True, verbose_name=_("Proj"))
+
+
     locate = models.BooleanField(default=False, verbose_name=_("locate"), help_text=_("Locate user on load?"))
     licence = models.ForeignKey(
         Licence,
@@ -137,9 +289,9 @@ class Map(NamedModel):
     modified_at = models.DateTimeField(auto_now=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, related_name="owned_maps", verbose_name=_("owner"), on_delete=models.PROTECT)
     editors = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, verbose_name=_("editors"))
-    edit_status = models.SmallIntegerField(choices=EDIT_STATUS, default=OWNER, verbose_name=_("edit status"))
+    edit_status = models.SmallIntegerField(choices=EDIT_STATUS, default=EDITORS, verbose_name=_("edit status"))
     share_status = models.SmallIntegerField(choices=SHARE_STATUS, default=PUBLIC, verbose_name=_("share status"))
-    settings = JSONField(blank=True, null=True, verbose_name=_("settings"), default=dict)
+    settings = DictField(blank=True, null=True, verbose_name=_("settings"))
 
     objects = models.Manager()
     public = PublicManager()
@@ -184,9 +336,7 @@ class Map(NamedModel):
         return can
 
     def can_view(self, request):
-        if self.share_status == self.BLOCKED:
-            can = False
-        elif self.owner is None:
+        if self.owner is None:
             can = True
         elif self.share_status in [self.PUBLIC, self.OPEN]:
             can = True
@@ -218,6 +368,9 @@ class Map(NamedModel):
             datalayer.clone(map_inst=new)
         return new
 
+    class Meta:
+        verbose_name = 'Workspace'
+        verbose_name_plural = 'Workspaces'
 
 class Pictogram(NamedModel):
     """
@@ -249,6 +402,22 @@ class DataLayer(NamedModel):
     """
     Layer to store Features in.
     """
+    ANONYMOUS = 1
+    EDITORS = 2
+    OWNER = 3
+    PUBLIC = 1
+    OPEN = 2
+    PRIVATE = 3
+    EDIT_STATUS = (
+        (ANONYMOUS, _('Everyone can edit')),
+        (EDITORS, _('Only editors can edit')),
+        (OWNER, _('Only owner can edit')),
+    )
+    SHARE_STATUS = (
+        (PUBLIC, _('everyone (public)')),
+        (OPEN, _('anyone with link')),
+        (PRIVATE, _('editors only')),
+    )
     map = models.ForeignKey(Map, on_delete=models.CASCADE)
     description = models.TextField(
         blank=True,
@@ -262,9 +431,45 @@ class DataLayer(NamedModel):
         help_text=_("Display this layer on load.")
     )
     rank = models.SmallIntegerField(default=0)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, related_name="owned_layers", verbose_name=_("owner"), on_delete=models.PROTECT)
+    editors = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="layer_editors", verbose_name=_("editors"))
+    edit_status = models.SmallIntegerField(choices=EDIT_STATUS, default=OWNER, verbose_name=_("edit status"))
+    share_status = models.SmallIntegerField(choices=SHARE_STATUS, default=PUBLIC, verbose_name=_("share status"))
 
     class Meta:
         ordering = ('rank',)
+
+    def can_edit(self, user=None, request=None):
+        """
+        Define if a user can edit or not the instance, according to his account
+        or the request.
+        """
+        can = False
+        if request and not self.owner:
+            if (getattr(settings, "UMAP_ALLOW_ANONYMOUS", False)
+                    and self.is_anonymous_owner(request)):
+                can = True
+        if self.edit_status == self.ANONYMOUS:
+            can = True
+        elif not user.is_authenticated:
+            pass
+        elif user == self.owner:
+            can = True
+        elif self.edit_status == self.EDITORS and user in self.editors.all():
+            can = True
+        return can
+
+    def can_view(self, request):
+        if self.owner is None:
+            can = True
+        elif self.share_status in [self.PUBLIC, self.OPEN]:
+            can = True
+        elif request.user == self.owner:
+            can = True
+        else:
+            can = not (self.share_status == self.PRIVATE
+                       and request.user not in self.editors.all())
+        return can
 
     def save(self, force_insert=False, force_update=False, **kwargs):
         is_new = not bool(self.pk)
@@ -350,3 +555,6 @@ class DataLayer(NamedModel):
                     self.geojson.storage.delete(path)
                 except FileNotFoundError:
                     pass
+    class Meta:
+        verbose_name = 'Data layer'
+        verbose_name_plural = 'Data layers'

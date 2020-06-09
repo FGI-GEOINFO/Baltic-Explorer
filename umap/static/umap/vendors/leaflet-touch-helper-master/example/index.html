@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaflet Touch Helper demo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet-src.js"></script>
+    <script src="../leaflet-touch-helper.js"></script>
+    <script src="al-siq.js"></script>
+    <script type="text/javascript">
+        var map = L.map('map').setView([30.32302, 35.45786], 17);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        var geojson = L.geoJson(alSiq).addTo(map);
+        L.path.touchHelper(geojson).addTo(map);
+
+        var poly = L.polygon([          
+                [
+                  30.326360294206886,
+                  35.4551339149475
+                ],
+                [
+                  30.32561943236827,
+                  35.45732259750366
+                ],
+                [
+                  30.324582216379977,
+                  35.45586347579956
+                ],
+                [
+                  30.325100825747015,
+                  35.454490184783936
+                ],
+                [
+                  30.326360294206886,
+                  35.4551339149475
+                ]
+            ])
+            .on('click', function() {
+                map.removeLayer(poly);
+            })
+            .addTo(map);
+        L.path.touchHelper(poly, {extraWeight: 50}).addTo(map);
+
+        geojson.bindPopup('Hello world.');
+    </script>
+</body>
+</html>

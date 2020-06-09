@@ -25,63 +25,41 @@ LANG_INFO.update({
         'name': 'Chinese',
         'name_local': '简体中文',
     },
-    'si': {
-        'bidi': False,
-        'code': 'si',
-        'name': 'Sinhala',
-        'name_local': 'සිංහල',
-    },
 })
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 TIME_ZONE = 'UTC'
 USE_TZ = True
-USE_I18N = True
+USE_I18N = False
 USE_L10N = True
 LANGUAGE_CODE = 'en'
 LANGUAGES = (
     ('am-et', 'Amharic'),
-    ('ar', 'Arabic'),
-    ('ast', 'Asturian'),
     ('bg', 'Bulgarian'),
     ('ca', 'Catalan'),
     ('cs-cz', 'Czech'),
     ('da', 'Danish'),
-    ('de', 'German'),
+    ('de', 'Deutsch'),
     ('el', 'Greek'),
     ('en', 'English'),
-    ('es', 'Spanish'),
-    ('et', 'Estonian'),
+    ('es', 'Español'),
     ('fi', 'Finnish'),
-    ('fr', 'French'),
-    ('gl', 'Galician'),
-    ('he', 'Hebrew'),
+    ('fr', 'Francais'),
     ('hr', 'Croatian'),
     ('hu', 'Hungarian'),
-    ('id', 'Indonesian'),
-    ('is', 'Icelandic'),
-    ('it', 'Italian'),
+    ('it', 'Italiano'),
     ('ja', 'Japanese'),
-    ('ko', 'Korean'),
     ('lt', 'Lithuanian'),
     ('nl', 'Dutch'),
-    ('no', 'Norwegian'),
     ('pl', 'Polish'),
-    ('pt-br', 'Portuguese (Brazil)'),
-    ('pt-pt', 'Portuguese (Portugal)'),
-    ('ro', 'Romanian'),
+    ('pt', 'Portuguese'),
     ('ru', 'Russian'),
-    ('si-lk', 'Sinhala (Sri Lanka)'),
     ('sk-sk', 'Slovak'),
     ('sl', 'Slovenian'),
-    ('sr', 'Serbian'),
-    ('sv', 'Swedish'),
-    ('th-th', 'Thai (Thailand)'),
-    ('tr', 'Turkish'),
     ('uk-ua', 'Ukrainian'),
     ('vi', 'Vietnamese'),
     ('zh', 'Chinese'),
-    ('zh-tw', 'Chinese (Taiwan)'),
+    ('zh-tw', 'Chinese'),
 )
 
 # Make this unique, and don't share it with anybody.
@@ -153,7 +131,6 @@ TEMPLATES = [
                 'django.template.context_processors.media',
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
-                'django.contrib.messages.context_processors.messages',
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
                 'umap.context_processors.settings',
@@ -195,7 +172,7 @@ UMAP_EXTRA_URLS = {
 }
 UMAP_KEEP_VERSIONS = 10
 SITE_URL = "http://umap.org"
-SITE_NAME = 'uMap'
+SITE_NAME = 'Baltic Explorer'
 UMAP_DEMO_SITE = False
 UMAP_EXCLUDE_DEFAULT_MAPS = False
 UMAP_MAPS_PER_PAGE = 5
@@ -220,7 +197,6 @@ COMPRESS_OFFLINE = True
 
 SOCIAL_AUTH_DEFAULT_USERNAME = lambda u: slugify(u)
 SOCIAL_AUTH_ASSOCIATE_BY_EMAIL = True
-SOCIAL_AUTH_NO_DEFAULT_PROTECTED_USER_FIELDS = True
 LOGIN_URL = "login"
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = "/login/popup/end/"
 SOCIAL_AUTH_PIPELINE = (
@@ -235,3 +211,9 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.load_extra_data',
     'social_core.pipeline.user.user_details'
 )
+
+
+# =============================================================================
+# Google reCAPTCHA
+# =============================================================================
+GOOGLE_RECAPTCHA_SECRET_KEY = '6LfnsPIUAAAAADlceYg3ztoYOL6IC-9pSvU2GcsJ'

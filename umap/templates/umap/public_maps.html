@@ -3,22 +3,21 @@
 {% load i18n %}
 
 {% block maincontent %}
-
 <div class="map_list row">
 <b>{% blocktrans %}<a href="/public/" style="color: #567795; font-size: 25px;">PUBLIC WORKSPACES</a>{% endblocktrans %}</b>
 </div>
+<div class="wrapper">
 
 {% include "umap/search_bar.html" %}
 
-{% if q %}
-  <div class="wrapper">
-    <div class="map_list row">
-    {% if maps %}
-      {% include "umap/map_list.html" with prefix='search_map_' %}
-    {% else %}
-        {% trans "No workspaces found." %}
-    {% endif %}
+<div class="map_list row">
+  {% if maps %}
+    {% include "umap/map_list.html" %}
+  {% else %}
+    <div>
+      {% blocktrans %}No public workspaces.{% endblocktrans %}
     </div>
-  </div>
-{% endif %}
+  {% endif %}
+</div>
+</div>
 {% endblock maincontent %}

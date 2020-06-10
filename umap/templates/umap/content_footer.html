@@ -1,17 +1,10 @@
 {% load  i18n %}
 
 <footer>
-    <a href="/" class="branding">umap</a> an OpenStreetMap project (version {{ UMAP_VERSION }})
-    {% get_language_info_list for LANGUAGES as languages %}
-    <form action="{% url "set_language" %}" method="post" class="i18n_switch">
-        {% csrf_token %}
-        <select name="language" onchange="this.form.submit()">
-        {% for language in languages %}
-        <option value="{{ language.code }}"
-            {% if language.code == LANGUAGE_CODE %}selected="selected"{% endif %}>
-            {{ language.name_local }}
-        </option>
-        {% endfor %}
-        </select>
-    </form>
+    <div style="margin-top: 80px; height: 110px; background-color: #ffffff;">
+    <p><img src="/static/umap/img/partners_logo.png" style="width: 100%; margin-top: 0px" align="middle"></p>
+    <p align="middle"><img class="bonusFooter" src="/static/umap/img/BONUS_logo.svg" ><img class="euFooter" src="/static/umap/img/eu_logo.svg"></p>
+
+    </div>
 </footer>
+<div class="foot"><p>BONUS BASMATI project has received funding from BONUS (Art 185), funded jointly by the EU and Innovation Fund Denmark, Swedish Research Council Formas, Academy of Finland, Latvian Ministry of Education and Science, and Forschungszentrum Jülich GmbH (Germany).<p></div>

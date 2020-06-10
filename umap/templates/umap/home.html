@@ -5,26 +5,105 @@
 {% block maincontent %}
 {% if DEMO_SITE %}
 <div class="wrapper demo-instance-warning">
-  <div class="row">
+  	<div class="row">
     {% blocktrans with repo_url="https://github.com/umap-project/umap" stable_url="http://umap.openstreetmap.fr" %}This is a demo instance, used for tests and pre-rolling releases. If you need a stable instance, please use <a href="{{ stable_url }}">{{ stable_url }}</a>. You can also host your own instance, it's <a href="{{ repo_url }}">open source</a>!{% endblocktrans %}
-  </div>
+  	</div>
 </div>
 {% endif %}
-{% include "umap/search_bar.html" %}
-{% include "umap/about_summary.html" %}
-{% if showcase_map %}
-  <div class="wrapper showcase-map">
-    <h2 class="section">{% blocktrans %}Map of the uMaps{% endblocktrans %}</h2>
-    <div class="row">
-      {% map_fragment showcase_map zoomControl=1 %}
-    </div>
+
+<div class="wrapper showcase-map">
+  <div class="row">
+	 <img src="{{ STATIC_URL }}umap/img/bxp_logo.svg" style="width: 100%;"/>  
   </div>
+</div>
+
+
+<div class="wrapper showcase-map">
+	<div class="row">
+		<p style="text-align: left; font-size: 25px; margin-bottom: 20px; color: #567795"><b>ABOUT BALTIC EXPLORER</b></p>
+		<div class="bxptool bxptool-left">
+			<img src="{{ STATIC_URL }}umap/img/BalticExplorerCover.png" style="width: 100%; border: 2px solid #567795;"/> 
+		</div>
+		<div class="bxptool bxptool-right">
+			<div style="text-align: left; color: #567795">
+				<ul style="list-style-type:disc; font-size: 25px; font-weight: bold;">
+				  <li style="margin: 1em 0em 2em 0em;">Explore spatial data and maps of the Baltic Sea</li>
+				  <li style="margin: 0em 0em 2em 0em;">Collaborate on a shared map workspace</li>
+				  <li style="margin: 0em 0em 2em 0em;">Draw and edit shared features on the map</li>
+				  <li style="margin: 0em 0em 2em 0em;">Work together and apart on multiple devices</li>
+				</ul> 
+		  	</div>
+		</div>
+	</div>
+</div>
+
+<div class="wrapper showcase-map">
+	<div class="row">
+		<p style="text-align: left; font-size: 25px; margin-bottom: 20px; color: #567795"><b>DIVE INTO BALTIC EXPLORER</b></p>
+		<div class="bxptool bxptool-left">
+			<iframe width="100%" height="315" style="border: 2px #567795 solid;" src="https://www.youtube.com/embed/daydYqgRjLQ?controls=0?modestbranding=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+		</div>
+
+		<div class="bxptool bxptool-right">
+			{% if user.is_authenticated %}
+			<div class="button-bar" style="padding-top: 5px; display:flex;">	
+				<a href="/map/sandbox_329" class="button quarter">Play in the Sandbox</a>
+			</div>
+
+			<div class="button-bar" style="padding-top: 5px; display:flex;">	
+				<a href="/public/" class="button quarter">Public Workspaces</a>
+			</div>
+
+			<div class="button-bar" style="padding-top: 5px; display:flex;">	
+				<a href="/user/{{ user }}" class="button quarter"/>My Workspaces</a>
+			</div>
+
+			<div class="button-bar" style="padding-top: 5px; display:flex;">	
+				<a href="{% url 'map_new' %}" class="button quarter">New Workspace</a>
+			</div>
+
+			{% else %}
+			<div class="button-bar" style="padding-top: 5px; display:flex;">	
+				<a href="/map/sandbox_329" class="button quarter">Play in the Sandbox</a>
+			</div>
+
+			<div class="button-bar" style="padding-top: 5px; display:flex;">	
+				<a href="/signup/" class="button quarter">Sign up for an Account</a>
+			</div>
+
+			<div class="button-bar" style="padding-top: 5px; display:flex;">	
+				<a href="/public/" class="button quarter">Browse Public Workspaces</a>
+			</div>
+
+			{% endif %}
+		</div>
+	</div>
+
+</div>
+
+{% if showcase_map %}
+<div class="wrapper showcase-map">
+    <!-- <h2 class="section">{% blocktrans %}Showcase Worskspace{% endblocktrans %}</h2> -->
+   	<div class="row">
+     	<!-- {% map_fragment showcase_map zoomControl=1 %} -->
+		<p style="text-align: left; font-size: 25px; margin-bottom: 20px; color: #567795"><b>SHOWCASE</b></p>
+		<iframe width="100%" height="350px" frameborder="0" style="border: 2px #567795 solid;" allowfullscreen src="/map/baltic-explorer-showcase-workspace_346?noControl=false&openWMSControl=false&protoControl=false&WMSlegend=false&infoControl=false&datalayersControl=false&fullscreenControl=false&measureControl=false&legendControl=false&syncControl=false&scaleControl=false
+&miniMap=false&scrollWheelZoom=true&zoomControl=true&allowEdit=false&moreControl=false&searchControl=null
+&tilelayersControl=null&embedControl=null&captionBar=false"></iframe>
+	</div>
+</div>
 {% endif %}
+
+{% include "umap/about_summary.html" %}
+<!-- {% include "umap/search_bar.html" %} -->
+
+
+<!--
 <div class="wrapper">
-  <h2 class="section">{% blocktrans %}Get inspired, browse maps{% endblocktrans %}</h2>
+        <p class="row" style="padding-top: 30px; font-size: 25px; margin-bottom: 30px; color: #567795"><b>WORKSPACES</b></p>
   <div class="map_list row">
     {% include "umap/map_list.html" %}
   </div>
 </div>
-
+-->
 {% endblock maincontent %}

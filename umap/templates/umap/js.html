@@ -1,6 +1,14 @@
 {% load compress %}
 {% compress js %}
+    <script type="text/javascript">
+        var MEDIA_URL = "{{ MEDIA_URL }}";
+        var form_element = "{{ form.as_p }}"
+    </script>
     <script src="{{ STATIC_URL }}umap/vendors/leaflet/leaflet-src.js"></script>
+    <script src="{{ STATIC_URL }}umap/vendors/Proj4Leaflet/lib/proj4.js"></script>
+    <script src="{{ STATIC_URL }}umap/vendors/Proj4Leaflet/lib/proj4-compressed.js"></script>
+    <script src="{{ STATIC_URL }}umap/vendors/Proj4Leaflet/src/proj4leaflet.js"></script>
+    <script src="{{ STATIC_URL }}umap/vendors/leaflet-touch-helper-master/leaflet-touch-helper.js"></script>
     <script src="{{ STATIC_URL }}umap/vendors/editable/Path.Drag.js"></script>
     <script src="{{ STATIC_URL }}umap/vendors/editable/Leaflet.Editable.js"></script>
     <script src="{{ STATIC_URL }}umap/vendors/hash/leaflet-hash.js"></script>
@@ -22,6 +30,7 @@
     <script src="{{ STATIC_URL }}umap/vendors/measurable/Leaflet.Measurable.js"></script>
     <script src="{{ STATIC_URL }}umap/vendors/togpx/togpx.js"></script>
     <script src="{{ STATIC_URL }}umap/vendors/tokml/tokml.js"></script>
+    <script src="{{ STATIC_URL }}umap/vendors/Sortable-master/Sortable.js"></script>
 {% endcompress %}
 {% if locale %}
     <script src="{{ STATIC_URL }}umap/locale/{{ locale }}.js"></script>

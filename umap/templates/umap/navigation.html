@@ -1,28 +1,48 @@
 {% load i18n %}
-<nav class="umap-nav">
-  <section>
-    <h1><a href="/">{{ title }}</a></h1>
-  </section>
 
-  <section>
-    <ul>
+<div class="row" style="margin-bottom: 0px;">
+
+</div>
+
+
+<nav class="umap-nav" >
+  <ul class="umap-nav" style="font-size: 20px; float: left;">
+      <li><a href="/" style="color: #567795; font-size: 20px;"><b>Home</b></a></li>
+      <li><a href="/public/" style="color: #567795; font-size: 20px;"><b>Public Workspaces</b></a></li>
       {% if user.is_authenticated %}
-        <li><a href="{% url 'user_maps' user.username %}">{% trans "My maps" %} ({{ user }})</a></li>
+          <li><b><a href="/user/{{ user }}" style="color: #567795"/>My Workspaces</a></b></span></li>
+          {% else %}
+
+          {% endif %}
+        <li><a href="/map/sandbox_426" style="color: #567795; font-size: 20px;"><b>Tutorial</b></a></li>
+        <li><a href="{{ STATIC_URL }}umap/BalticExplorerUserGuide.pdf" target="_new" style="color: #567795; font-size: 20px;"><b>User Guide</b></a></li>  
+        <li><a href="/map/sandbox_329" style="color: #567795; font-size: 20px;"><b>Sandbox</b></a></li>
+  </ul>
+
+  <section style="float:right">
+    <ul style="font-size: 20px;">
+      <li>{% blocktrans with BBP_bxp_url="http://bonusbasmati.eu/about-the-project/baltic-explorer/" %}<a href="{{ BBP_bxp_url }}" target="_blank" style="color: #567795"/><b>About Baltic Explorer</b></a> {% endblocktrans %}</li>
+    </ul>
+    <ul style="font-size: 15px;">
+
+    <ul style="font-size: 20px;">
+      <li>{% blocktrans with BBP_url="http://bonusbasmati.eu" %}<a href="{{ BBP_url }}" target="_black" style="color: #567795"/><b>About BONUS BASMATI</b></a> {% endblocktrans %}</li>
+    </ul>
+    <ul style="font-size: 15px;">
+
+      {% if user.is_authenticated %}
+        <li><b><a href="/user/{{ user }}" style="color: #567795"/>{{ user }}</a></b></span> <a href="{% url 'logout' %}" class="logout" style="color: #567795"/>{% trans "Log out" %}</a></li>
       {% else %}
-        <li><a href="{% url 'login' %}" class="login">{% trans "Log in" %} / {% trans "Sign in" %}</a></li>
+        <li><a href="{% url 'login' %}" class="login" style="color: #567795"/>Log in</a></li>
+        <li><a href="{% url 'signup' %}" class="login" style="color: #567795"/>Sign up</a></li>
       {% endif %}
-      <li><a href="{% url 'about' %}">{% trans "About" %}</a></li>
-      <li><a href="{{ UMAP_FEEDBACK_LINK }}">{% trans "Feedback" %}</a></li>
+      <!-- <li><a href="{{ UMAP_FEEDBACK_LINK }}">{% trans "Feedback" %}</a></li> -->
       {% if user.is_authenticated %}
         {% if user.has_usable_password %}
-          <li><a href="{% url 'password_change' %}" >{% trans "Change password" %}</a></li>
+          <li><a href="{% url 'password_change' %}"  style="color: #567795"/>{% trans "Change password" %}</a></li>
         {% endif %}
-        <li><a href="{% url 'logout' %}" class="logout">{% trans "Log out" %}</a></li>
       {% endif %}
-    </ul>
-  </section>
+	</ul>
 
-  <section>
-    <a href="{% url 'map_new' %}" class="button">{% trans "Create a map" %}</a>
   </section>
 </nav>

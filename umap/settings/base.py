@@ -216,4 +216,4 @@ SOCIAL_AUTH_PIPELINE = (
 # =============================================================================
 # Google reCAPTCHA
 # =============================================================================
-GOOGLE_RECAPTCHA_SECRET_KEY = '6LfnsPIUAAAAADlceYg3ztoYOL6IC-9pSvU2GcsJ'
+GOOGLE_RECAPTCHA_SECRET_KEY = ''

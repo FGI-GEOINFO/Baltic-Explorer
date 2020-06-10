@@ -3,16 +3,19 @@
 {% load i18n %}
 
 {% block maincontent %}
-<div class="col wide">
-  <h2 class="section">{% blocktrans %}Browse {{ current_user }}'s maps{% endblocktrans %}</h2>
+<div class="map_list row">
+<b><a href="/public/" style="color: #567795; font-size: 25px;">{% blocktrans %}WORKSPACES BY {{ current_user }}{% endblocktrans %}</b></a>
 </div>
 <div class="wrapper">
+
+{% include "umap/search_bar.html" %}
+
 <div class="map_list row">
   {% if maps %}
     {% include "umap/map_list.html" %}
   {% else %}
     <div>
-      {% blocktrans %}{{ current_user }} has no maps.{% endblocktrans %}
+      {% blocktrans %}{{ current_user }} has no workspaces.{% endblocktrans %}
     </div>
   {% endif %}
 </div>

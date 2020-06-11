@@ -1,17 +1,24 @@
 # Tutorial
 
-This tutorial will cover an installation from scratch of a uMap instance in an Ubuntu server.
+This tutorial will cover an installation from scratch of a Baltic Explorer instance in an Ubuntu 18.04 LTS.
 
-You need sudo grants on this server, and it must be connected to Internet.
+You need sudo grants, and it must be connected to Internet.
 
-## Install system dependencies
 
-    sudo apt install build-essential autoconf python3.6 python3.6-dev python-virtualenv wget nginx uwsgi uwsgi-plugin-python3 postgresql-9.5 postgresql-server-dev-9.5 postgresql-9.5-postgis-2.2 git libxml2-dev libxslt1-dev zlib1g-dev
+## Install python-GDAL dependencies
+*GDAL is not needed in the main Baltic Explorer system. It is included to enable adding, for example analysis functioanlities to the system. If you wish to not install GDAL, in order to not get errors in the installation, you need to remove the import of "osgeo" from the views.py file.
 
-*Note: nginx and uwsgi are not required for local development environment*
+    sudo add-apt-repository ppa:ubuntugis/ppa
 
-*Note: uMap also works with python 2.7 and 3.4, so adapt the package names if you work with another version.*
+    sudo apt-get update
+    sudo apt install gdal-bin
+    
+    export CPLUS_INCLUDE_PATH=/usr/include/gdal
+    export C_INCLUDE_PATH=/usr/include/gdal
 
+## Install other system dependencies
+
+    sudo apt install build-essential autoconf python3.6 python3.6-dev python-virtualenv wget nginx uwsgi uwsgi-plugin-python3 postgresql-10 postgresql-server-dev-10 postgresql-10-postgis-2.4 git libxml2-dev libxslt1-dev zlib1g-dev
 
 ## Create deployment directories:
 
@@ -28,6 +35,11 @@ You need sudo grants on this server, and it must be connected to Internet.
 *Here we use the name `umap`, but this name is up to you. Remember to change it
 on the various commands and configuration files if you go with your own.*
 
+## Create folders for custom files
+*you can change these locations, but you need to specify the directories in the configurations (umap.conf file). If you place them in a location other than /srv/umap, you need to give user umap ownership of the directories (e.g. like what is done for /srv/umap in the next step). 
+    
+    sudo mkdir -p /srv/umap/var/static
+    sudo mkdir -p /srv/umap/var/templates
 
 ## Give umap user access to the config folder
 
@@ -67,27 +79,28 @@ you will need to run again this last line.*
 
 
 ## Install umap
+*Specify the path to the downloaded and unzipped Baltic-Explorer-master directory
 
-    pip install umap-project
+    pip3 install /PATH/TO/Baltic-Explorer-master
 
+## Install GDAL
+*GDAL is not needed in the main Baltic Explorer system. It is included to enable adding, for example analysis functioanlities to the system. If you wish to not install GDAL, in order to not get errors in the installation, you need to remove the import of "osgeo" from the views.py file.
+
+    pip3 install numpy
+    pip3 install GDAL==2.4.2
+    pip3 install rasterio
 
 ## Create a local configuration file
 
-    wget https://raw.githubusercontent.com/umap-project/umap/master/umap/settings/local.py.sample -O /etc/umap/umap.conf
+    cp PATH/TO/Baltic-Explorer-master/etc/umap/umap.conf /etc/umap/umap.conf
 
 ## Customize umap.conf
 
     nano /etc/umap/umap.conf
 
-Change the following properties:
-
-```
-STATIC_ROOT = '/srv/umap/var/static'
-MEDIA_ROOT = '/srv/umap/var/data'
-```
-
 ## Create the tables
-
+    
+    umap makemigrations
     umap migrate
 
 ## Collect the statics
@@ -107,7 +120,11 @@ You can now go to [http://localhost:8000/](http://localhost:8000/) and try to cr
 When you're done with testing, quit the demo server (type Ctrl+C).
 
 
+
 ## Configure the HTTP API
+
+*Note: nginx and uwsgi are not required for local development environment* 
+i.e. you do not have to do the following parts if you just wish to run Baltic Explorer locally from your own computer
 
 Now let's configure a proper HTTP server.
 

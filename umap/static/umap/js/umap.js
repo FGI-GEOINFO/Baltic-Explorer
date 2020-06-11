@@ -1102,12 +1102,12 @@ L.U.Map.include({
 
 
     goToFrontPage: function(){
-        window.location.href =('http://balticexplorer.eu');
+        window.location.href =('/');
     },
 
 
     goToUserGuide: function(){
-        window.open('http://balticexplorer.eu/static/umap/BalticExplorerUserGuide.pdf', '_new');
+        window.open('/static/umap/BalticExplorerUserGuide.pdf', '_new');
     },
 
     displayHelp: function () {

@@ -23,4 +23,6 @@ Baltic Explore uses uMap [umap-project](https://github.com/umap-project/) [djang
 
 ## Installation and configuration
 
+We recommend installing Baltic Explorer on a Ubuntu manchine (e.g. Ubuntu 18.04 LTS)
+
 Follow this installation guide: https://github.com/FGI-GEOINFO/Baltic-Explorer/blob/master/docs/ubuntu.md

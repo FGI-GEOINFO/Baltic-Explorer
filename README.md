@@ -24,9 +24,4 @@ Baltic Explore uses uMap [umap-project](https://github.com/umap-project/) [djang
 
 ## Installation and configuration
 
-The installation will have two phases. First install uMap. Then replace uMap files with the files in this repository.
-
-1. Install uMap [uMap developer documentation](https://umap-project.readthedocs.io/en/latest/install/).
-2. Copy the files from this repository to the following locations 
-- /etc/umap/umap.conf -> /etc/umap/umap.conf
-- /umap -> /srv/umap/venv/lib/python3.6/site-packages/umap/*.*
+Follow this installation guide: https://github.com/FGI-GEOINFO/Baltic-Explorer/blob/master/docs/ubuntu.md

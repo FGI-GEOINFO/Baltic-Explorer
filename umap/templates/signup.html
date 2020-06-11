@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<center>
+<div>
+<div class="col"><a href="/"><img src="/static/umap/img/logo_short.svg" style="width: 200px; height: auto;"></a></div>
+  <h2>Sign up for a Baltic Explorer user account</h2>
+  <form method="post">
+ {% csrf_token %}
+    {% for field in form %}
+      <p>
+        {{ field.label_tag }}<br>
+        {{ field }}<br>
+        {% if field.help_text %}
+          <small style="color: grey">{{ field.help_text }}</small>
+        {% endif %}<br>
+        {% for error in field.errors %}
+          <p style="color: red">{{ error }}</p>
+        {% endfor %}
+      </p>
+    {% endfor %}
+
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+    <div class="g-recaptcha" data-sitekey="6LfnsPIUAAAAACXeBFfqGfNT8T406ZMMfXKhAvAj"></div>
+
+    <button type="submit">Sign up</button>
+  </form>
+{% endblock %}
+</div>
+</center>

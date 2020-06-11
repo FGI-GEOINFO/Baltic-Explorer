@@ -72,7 +72,7 @@ From now on, unless we say differently, the commands are run as `umap` user.
 ## Create a virtualenv and activate it
 
     virtualenv /srv/umap/venv --python=/usr/bin/python3.6
-    source /srv/umap/venv/bin/activate
+    . /srv/umap/venv/bin/activate
 
 *Note: this activation is not persistent, so if you open a new terminal window,
 you will need to run again this last line.*
@@ -95,7 +95,7 @@ you will need to run again this last line.*
     cp PATH/TO/Baltic-Explorer-master/etc/umap/umap.conf /etc/umap/umap.conf
 
 ## Customize umap.conf
-
+*NOTE! If you just want to start by testing that everything works, you can skipt this step.
     nano /etc/umap/umap.conf
 
 ## Create the tables
@@ -119,7 +119,14 @@ You can now go to [http://localhost:8000/](http://localhost:8000/) and try to cr
 
 When you're done with testing, quit the demo server (type Ctrl+C).
 
+## Add minimum data requirements
 
+login to http://localhost:8000/admin and add a WMS provider, category and layer. Also add a background map.
+Data for baltic sea can be found from, amongst others, HELCOM.
+E.g. some layers:
+https://maps.helcom.fi/arcgis/services/MADS/Biodiversity/MapServer/WMSServer?request=GetCapabilities&service=WMS
+Background map:
+To be added!
 
 ## Configure the HTTP API
 

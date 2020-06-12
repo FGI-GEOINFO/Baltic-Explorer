@@ -3,7 +3,7 @@
 
 ![image](http://balticexplorer.eu/static/umap/img/BalticExplorerCover.png)
 
-[![Documentation Status](https://readthedocs.org/projects/umap-project/badge/?version=latest)](http://umap-project.readthedocs.io/en/latest/?badge=latest)[![Build Status](https://travis-ci.org/umap-project/umap.svg?branch=master)](https://travis-ci.org/umap-project/umap)
+[![Documentation Status](https://readthedocs.org/projects/umap-project/badge/?version=latest)](http://umap-project.readthedocs.io/en/latest/?badge=latest) [![Build Status](https://travis-ci.org/umap-project/umap.svg?branch=master)](https://travis-ci.org/umap-project/umap)
 
 ## About
 
@@ -23,6 +23,6 @@ Baltic Explore uses uMap [umap-project](https://github.com/umap-project/) [djang
 
 ## Installation and configuration
 
-We recommend installing Baltic Explorer on a Ubuntu manchine (e.g. Ubuntu 18.04 LTS)
+We recommend installing Baltic Explorer on a Ubuntu machine (e.g. Ubuntu 18.04 LTS)
 
 Follow this installation guide: https://github.com/FGI-GEOINFO/Baltic-Explorer/blob/master/docs/ubuntu.md

@@ -1,9 +1,12 @@
-# Tutorial
+# Install instructions for Ubuntu 18.04 from local copy
 
-This tutorial will cover an installation from scratch of a Baltic Explorer instance in an Ubuntu 18.04 LTS.
+This tutorial will cover an installation of Baltic Explorer for Ubuntu 18.04 LTS from a local copy.
 
 You need sudo grants, and it must be connected to Internet.
 
+## Download Baltic-Explorer-master
+
+Download and save Baltic-Explorer-master from github.
 
 ## Install python-GDAL dependencies
 *GDAL is not needed in the main Baltic Explorer system. It is included to enable adding, for example analysis functioanlities to the system. If you wish to not install GDAL, in order to not get errors in the installation, you need to remove the import of "osgeo" from the views.py file.
@@ -123,7 +126,7 @@ When you're done with testing, quit the demo server (type Ctrl+C).
 
 login to http://localhost:8000/admin and add a WMS provider, category and layer. Also add a background map.
 Data for baltic sea can be found from, amongst others, HELCOM.
-E.g. some layers:
+E.g. wms layers:
 https://maps.helcom.fi/arcgis/services/MADS/Biodiversity/MapServer/WMSServer?request=GetCapabilities&service=WMS
 Background map:
 To be added!
@@ -280,13 +283,8 @@ Congratulations!
 In your local.py file, add a real secret and unique `SECRET_KEY`, and do
 not share it.
 
-### Remove DEMO flag
 
-In your local.py:
-
-    UMAP_DEMO_SITE = False
-    DEBUG = False
-    
+### Specify locations
 In your nginx config:
 
     location /static {
@@ -306,7 +304,7 @@ authentication.
 
 ### Configure default map center
 
-In your local.py change those settings:
+In your umap.conf change those settings:
 
     LEAFLET_LONGITUDE = 2
     LEAFLET_LATITUDE = 51
@@ -329,7 +327,7 @@ In your local.py:
 Also adapt `ALLOWED_HOSTS` accordingly.
 
 
-## Add more tilelayers, pictograms…
+## Add more background maps, wms layers etc.
 
 Go to the admin: [http://localhost:8020/admin/](http://localhost:8020/admin/),
 and create the objects you want.

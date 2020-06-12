@@ -11,7 +11,7 @@ You need sudo grants, and it must be connected to Internet.
     sudo add-apt-repository ppa:ubuntugis/ppa
 
     sudo apt-get update
-    sudo apt install gdal-bin
+    sudo apt install gdal-bin libgdal-dev
     
     export CPLUS_INCLUDE_PATH=/usr/include/gdal
     export C_INCLUDE_PATH=/usr/include/gdal

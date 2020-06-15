@@ -3,8 +3,6 @@
 
 ![image](http://balticexplorer.eu/static/umap/img/BalticExplorerCover.png)
 
-[![Documentation Status](https://readthedocs.org/projects/umap-project/badge/?version=latest)](http://umap-project.readthedocs.io/en/latest/?badge=latest) [![Build Status](https://travis-ci.org/umap-project/umap.svg?branch=master)](https://travis-ci.org/umap-project/umap)
-
 ## About
 
 Baltic Explorer is a web-map application that is designed for collaborative maritime spatial

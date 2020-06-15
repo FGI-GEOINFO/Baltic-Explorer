@@ -1,6 +1,6 @@
-# The Latvia case study module shows an example of how analysis functioanlities could be added to Baltic Explorer.
+# The Latvia case study module shows one example analysis functionalities added to Baltic Explorer.
 
-# The functionality is a minimum viable product version. For a smoother experience, use ajax when developing new analysis functioanlities, to avoid having to reload pages to see results.
+* The example shows a minimum viable product version. For a smoother experience, use ajax when developing new analysis functioanlities to avoid having to reload pages to see results.
 
 # Replace the files in umap with these files.
 *Javascript files can be added to "umap/static/umap/js/" or to the custom static folder specified in the umap.conf file

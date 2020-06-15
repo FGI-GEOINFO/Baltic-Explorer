@@ -1,7 +1,7 @@
-# Customize your uMap installation
+# Customize your Baltic Explorer installation
 
 
-When running your own uMap, you may want to changed its appearance, for example
+When running your own Baltic Explorer, you may want to changed its appearance, for example
 you want your own logo on the home page, or you want to apply some design, or
 you want to add some tracking (but anonymous!) script…
 
@@ -12,10 +12,10 @@ you will put the templates or statics you want to control (and only those).
 
 Inside thore directory, you need to respect the exact relative path of the
 templates or statics you are adding, relatively to the
-[templates](https://github.com/umap-project/umap/tree/master/umap/templates)
+[templates](https://github.com/FGI-GEOINFO/Baltic-Explorer/tree/master/umap/templates)
 and
-[static](https://github.com/umap-project/umap/tree/master/umap/static)
-roots in the uMap structure.
+[static](https://github.com/FGI-GEOINFO/Baltic-Explorer/tree/master/umap/static)
+roots in the Baltic Explorer structure.
 For example, if you want to control the logo, you will add your own static with
 the relative path `umap/img/logo.svg`.
 
@@ -52,7 +52,7 @@ Now let's create our custom navigation file:
     vim /srv/umap/custom/templates/umap/navigation.html
 
 We certainly want to copy-paste the
-[original one](https://github.com/umap-project/umap/blob/master/umap/templates/umap/navigation.html)
+[original one](https://github.com/FGI-GEOINFO/Baltic-Explorer/tree/master/umap/templates/umap/navigation.html)
 to adapt it.
 
 Now let's add our custom logo, with whatever path inside the static dir, given

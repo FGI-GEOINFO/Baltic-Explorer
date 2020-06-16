@@ -1,4 +1,4 @@
-# The Latvia case study module shows one example analysis functionalities added to Baltic Explorer.
+# The Latvia case study module shows one example of analysis functionalities added to Baltic Explorer.
 
 * The example shows a minimum viable product version. For a smoother experience, use ajax when developing new analysis functioanlities to avoid having to reload pages to see results.
 

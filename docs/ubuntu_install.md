@@ -2,7 +2,7 @@
 
 This tutorial will cover an installation of Baltic Explorer for Ubuntu 18.04 LTS from a local copy.
 
-You need sudo grants, and it must be connected to Internet.
+You need sudo grants and must be connected to Internet.
 
 ## Download Baltic-Explorer-master
 

@@ -39,7 +39,7 @@ Download and save Baltic-Explorer master from GitHub.
 on the various commands and configuration files if you go with your own.*
 
 ## Create folders for custom files
-*you can change these locations, but you need to specify the directories in the configurations (umap.conf file). If you place them in a location other than /srv/umap, you need to give user umap ownership of the directories (e.g. like what is done for /srv/umap in the next step). 
+*you can change these locations, but you need to specify the directories in the configurations (umap.conf file). If you place them in a location other than /srv/umap, you need to give user umap ownership of the directories (e.g. like what is done for /srv/umap in the next step).*
     
     sudo mkdir -p /srv/umap/var/static
     sudo mkdir -p /srv/umap/var/templates

@@ -98,7 +98,8 @@ you will need to run again this last line.*
     cp PATH/TO/Baltic-Explorer-master/etc/umap/umap.conf /etc/umap/umap.conf
 
 ## Customize umap.conf
-*NOTE! If you just want to start by testing that everything works, you can skipt this step.
+*NOTE! If you just want to start by testing that everything works, you can skipt this step.*
+    
     nano /etc/umap/umap.conf
 
 ## Create the tables

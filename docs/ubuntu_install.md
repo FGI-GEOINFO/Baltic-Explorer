@@ -87,7 +87,7 @@ you will need to run again this last line.*
     pip3 install /PATH/TO/Baltic-Explorer-master
 
 ## Install GDAL
-*GDAL is not needed in the main Baltic Explorer system. It is included to enable adding, for example analysis functioanlities to the system. If you wish to not install GDAL, in order to not get errors in the installation, you need to remove the import of "osgeo" from the views.py file.*
+*GDAL is not needed in the main Baltic Explorer system. It is included to enable adding, for example, analysis functionalities to the system. If you wish to not install GDAL, in order to not get errors in the installation, you need to remove the import of "osgeo" from the views.py file.*
 
     pip3 install numpy
     pip3 install GDAL==2.4.2

@@ -131,8 +131,8 @@ Background map: To be added!
 
 ## Configure the HTTP API
 
-*Note: nginx and uwsgi are not required for local development environment* 
-i.e. you do not have to do the following parts if you just wish to run Baltic Explorer locally from your own computer
+*Note: nginx and uwsgi are not required for local development environment.* 
+That is, you do not have to do the following parts if you just wish to run Baltic Explorer locally from your own computer.
 
 Now let's configure a proper HTTP server.
 

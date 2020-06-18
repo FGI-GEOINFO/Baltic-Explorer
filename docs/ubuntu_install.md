@@ -1,6 +1,6 @@
-# Install instructions for Ubuntu 18.04 as a local copy
+# Install instructions of a local copy for Ubuntu 18.04
 
-This tutorial will cover an installation of Baltic Explorer for Ubuntu 18.04 LTS as a local copy.
+This tutorial will cover an installation of Baltic Explorer as a local copy for Ubuntu 18.04 LTS.
 
 You need sudo grants and must be connected to the Internet.
 

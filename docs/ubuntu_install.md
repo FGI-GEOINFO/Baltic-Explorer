@@ -126,7 +126,7 @@ When you're done with testing, quit the demo server (type Ctrl+C).
 ## Add minimum data requirements
 
 login to http://localhost:8000/admin and add a WMS provider, category and layer. Also add a background map.
-Data for baltic sea can be found from, amongst others, HELCOM.
+Data for Baltic Sea can be found from, amongst others, HELCOM.
 E.g. wms layers:
 https://maps.helcom.fi/arcgis/services/MADS/Biodiversity/MapServer/WMSServer?request=GetCapabilities&service=WMS
 Background map:

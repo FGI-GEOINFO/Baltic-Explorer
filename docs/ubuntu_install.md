@@ -9,7 +9,7 @@ You need sudo grants and must be connected to the Internet.
 Download and save Baltic-Explorer-master from github.
 
 ## Install python-GDAL dependencies
-*GDAL is not needed in the main Baltic Explorer system. It is included to enable adding, for example analysis functioanlities to the system. If you wish to not install GDAL, in order to not get errors in the installation, you need to remove the import of "osgeo" from the views.py file.
+*GDAL is not needed in the main Baltic Explorer system. It is included to enable adding, for example, analysis functionalities to the system. If you do not wish to install GDAL, in order not to get errors in the installation, you need to remove the import of "osgeo" from the views.py file.*
 
     sudo add-apt-repository ppa:ubuntugis/ppa
 

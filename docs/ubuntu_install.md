@@ -4,9 +4,9 @@ This tutorial will cover an installation of Baltic Explorer for Ubuntu 18.04 LTS
 
 You need sudo grants and must be connected to the Internet.
 
-## Download Baltic-Explorer-master
+## Download Baltic-Explorer master
 
-Download and save Baltic-Explorer-master from github.
+Download and save Baltic-Explorer master from GitHub.
 
 ## Install GDAL Python dependencies
 *GDAL is not needed in the main Baltic Explorer system. It is included to enable adding, for example, analysis functionalities to the system. If you do not wish to install GDAL, in order not to get errors in the installation, you need to remove the import of "osgeo" from the views.py file.*

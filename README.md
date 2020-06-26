@@ -24,3 +24,21 @@ Baltic Explore uses uMap [umap-project](https://github.com/umap-project/) [djang
 We recommend installing Baltic Explorer on a Ubuntu machine (e.g. Ubuntu 18.04 LTS)
 
 Follow this installation guide: https://github.com/FGI-GEOINFO/Baltic-Explorer/blob/master/docs/ubuntu_install.md
+
+## Authorship
+
+Christian Koski<sup>1</sup>, Mikko Rönneberg<sup>2</sup>, Pyry Kettunen<sup>3</sup>, Juha Oksanen<sup>4</sup>, Henning Sten Hansen<sup>5</sup>
+
+<sup>1,2,3,4</sup> *Finnish Geospatial Research Institute in the National Land Survey of Finland*<br/>
+<sup>5</sup> *Aalborg University*
+
+Development of the [Baltic Explorer](http://balticexplorer.eu) was made in the [BONUS BASMATI](http://bonusbasmati.eu) project.
+
+The authors contributed to the development as follows:
+
+<sup>1,2</sup> Programming<br/>
+<sup>3</sup> Managing development team<br/>
+<sup>1,2,3,4</sup> Defining requirements, Designing, Usability, User testing<br/>
+<sup>4,5</sup> Supervising development<br/>
+
+Thanks to our partners in the [BONUS BASMATI](http://bonusbasmati.eu) project for their contributions in improving the software.

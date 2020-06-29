@@ -315,6 +315,29 @@ L.U.Map.include({
         else this.scrollWheelZoom.disable();
         this.maxSizeControl();
         this.renderControls();
+        if (this.options.allowEdit && !this.options.noControl) {
+            this.editControl = new L.U.EditControl(this).addTo(this);
+            if (window.matchMedia('screen and (max-height: 600px)').matches) {
+                const drawToolBar = new L.U.DrawToolbar({
+                        map: this, 
+                        position: 'bottomleft',
+                    }).addTo(this);
+            
+            }
+            else{
+                const drawToolBar = new L.U.DrawToolbar({
+                        map: this, 
+                        position: 'topleft',
+                    }).addTo(this);
+            }           
+
+            var editActions = [
+
+            ];
+            new L.U.SettingsToolbar({actions: editActions, position: 'topleft'}).addTo(this);
+                    
+        }
+
 
     },
 

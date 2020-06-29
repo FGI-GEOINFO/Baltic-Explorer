@@ -6,7 +6,7 @@ You need sudo grants and must be connected to the Internet.
 
 ## Download Baltic Explorer master
 
-Download and save Baltic Explorer master from GitHub.
+Download and unzip Baltic Explorer master from GitHub.
 
 ## Install GDAL Python dependencies
 *GDAL is not needed in the main Baltic Explorer system. It is included to enable adding, for example, analysis functionalities to the system. If you do not wish to install GDAL, in order not to get errors in the installation, you need to remove the import of "osgeo" from the views.py file.*
@@ -83,11 +83,13 @@ you will need to run again this last line.*
 
 ## Install umap
 *Specify the path to the downloaded and unzipped Baltic-Explorer-master directory*
+(make sure you are in the virual environment)
 
     pip3 install /PATH/TO/Baltic-Explorer-master
 
 ## Install GDAL
 *GDAL is not needed in the main Baltic Explorer system. It is included to enable adding, for example, analysis functionalities to the system. If you wish to not install GDAL, in order to not get errors in the installation, you need to remove the import of "osgeo" from the views.py file.*
+(make sure you are in the virtual environment)
 
     pip3 install numpy
     pip3 install GDAL==2.4.2
@@ -124,6 +126,7 @@ You can now go to [http://localhost:8000/](http://localhost:8000/) and try to cr
 When you're done with testing, quit the demo server (type Ctrl+C).
 
 ## Add minimum data requirements
+NOTE! Baltic Explorer will not run correctly without any WMS data. You also need a background map for the map interface.
 
 Login to http://localhost:8000/admin and add a WMS provider, category and layer. Also add a background map. Data and maps for the Baltic Sea can be found from, amongst others, HELCOM. For example, find WMS layers here: https://maps.helcom.fi/arcgis/services/MADS/Biodiversity/MapServer/WMSServer?request=GetCapabilities&service=WMS
 

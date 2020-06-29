@@ -273,6 +273,7 @@ L.U.Map.include({
     initControls: function () {
         this.helpMenuActions = {};
         this._controls = {};
+
         this._controls.scale = new L.control.scale({ 
             position: 'bottomright',
             maxWidth: "200"
@@ -315,29 +316,17 @@ L.U.Map.include({
         else this.scrollWheelZoom.disable();
         this.maxSizeControl();
         this.renderControls();
+
+
         if (this.options.allowEdit && !this.options.noControl) {
-            this.editControl = new L.U.EditControl(this).addTo(this);
-            if (window.matchMedia('screen and (max-height: 600px)').matches) {
-                const drawToolBar = new L.U.DrawToolbar({
-                        map: this, 
-                        position: 'bottomleft',
-                    }).addTo(this);
-            
-            }
-            else{
-                const drawToolBar = new L.U.DrawToolbar({
-                        map: this, 
-                        position: 'topleft',
-                    }).addTo(this);
-            }           
+            new L.U.EditControl(this).addTo(this);
+
+            new L.U.DrawToolbar({map: this, position: 'topleft'}).addTo(this);
 
             var editActions = [
-
             ];
-            new L.U.SettingsToolbar({actions: editActions, position: 'topleft'}).addTo(this);
-                    
+            new L.U.SettingsToolbar({actions: editActions}).addTo(this);
         }
-
 
     },
 
@@ -374,29 +363,7 @@ L.U.Map.include({
             else L.DomUtil.removeClass(control._container, 'display-on-more');
         }
         if (this.options.moreControl) this._controls.more.addTo(this);
-        if (this.editControl) {
-            this.removeControl(this.editControl);
-        }
-        if (this.options.allowEdit && !this.options.noControl) {
-            this.editControl = new L.U.EditControl(this).addTo(this);
-            if (window.matchMedia('screen and (max-height: 600px)').matches) {
-                const drawToolBar = new L.U.DrawToolbar({
-                        map: this, 
-                        position: 'bottomleft',
-                    }).addTo(this);
-            
-            }
-            else{
-                const drawToolBar = new L.U.DrawToolbar({
-                        map: this, 
-                        position: 'topleft',
-                    }).addTo(this);
-            }           
 
-            new L.U.SettingsToolbar({actions: editActions, position: 'topleft'}).addTo(this);
-                    
-        }
-        
     },
     //check the size of the screen and changes the size of the scale bar, can be used for other controls as well
     maxSizeControl: function(){
@@ -1125,12 +1092,12 @@ L.U.Map.include({
 
 
     goToFrontPage: function(){
-        window.location.href =('/');
+        window.location.href =('http://balticexplorer.eu');
     },
 
 
     goToUserGuide: function(){
-        window.open('/static/umap/BalticExplorerUserGuide.pdf', '_new');
+        window.open('http://balticexplorer.eu/static/umap/BalticExplorerUserGuide.pdf', '_new');
     },
 
     displayHelp: function () {

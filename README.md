@@ -41,4 +41,4 @@ The authors contributed to the development as follows:
 <sup>1,2,3,4</sup> Defining requirements, Designing, Usability, User testing<br/>
 <sup>4,5</sup> Supervising development<br/>
 
-Thanks to our partners in the [BONUS BASMATI](http://bonusbasmati.eu) project for their contributions in improving the software.
+Thanks to our partners in the [BONUS BASMATI](http://bonusbasmati.eu) project for their significant contributions in improving the software.

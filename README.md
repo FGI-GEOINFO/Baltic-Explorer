@@ -27,18 +27,18 @@ Follow this installation guide: https://github.com/FGI-GEOINFO/Baltic-Explorer/b
 
 ## Authorship
 
-Christian Koski<sup>1</sup>, Mikko Rönneberg<sup>2</sup>, Pyry Kettunen<sup>3</sup>, Juha Oksanen<sup>4</sup>, Henning Sten Hansen<sup>5</sup>
+Christian Koski<sup>1</sup>, Mikko Rönneberg<sup>2</sup>, Reetta Välimäki <sup>3</sup>, Pyry Kettunen<sup>4</sup>, Juha Oksanen<sup>5</sup>, Henning Sten Hansen<sup>6</sup>
 
-<sup>1,2,3,4</sup> *Finnish Geospatial Research Institute in the National Land Survey of Finland*<br/>
-<sup>5</sup> *Aalborg University*
+<sup>1,2,3,4,5</sup> *Finnish Geospatial Research Institute in the National Land Survey of Finland*<br/>
+<sup>6</sup> *Aalborg University*
 
 Development of the [Baltic Explorer](http://balticexplorer.eu) was made in the [BONUS BASMATI](http://bonusbasmati.eu) project.
 
 The authors contributed to the development as follows:
 
-<sup>1,2</sup> Programming<br/>
-<sup>3</sup> Managing development team<br/>
-<sup>1,2,3,4</sup> Defining requirements, Designing, Usability, Use and user testing<br/>
-<sup>4,5</sup> Supervising development<br/>
+<sup>1,2,3</sup> Programming<br/>
+<sup>4</sup> Managing the project and the development team<br/>
+<sup>1,2,4,5</sup> Defining requirements, Designing, Usability, Use and user testing<br/>
+<sup>5,6</sup> Supervising development<br/>
 
 Thanks to our partners in the [BONUS BASMATI](http://bonusbasmati.eu) project for their significant contributions in improving the software.
